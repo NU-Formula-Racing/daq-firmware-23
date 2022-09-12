@@ -1,36 +1,15 @@
 #include <Arduino.h>
 #include "pinDefs.h"
+#include "../lib/CAN/include/virtualTimer.h"
 
 #define SERIAL_DEBUG
 
-//Structure for handling timers 
-typedef struct 
-{
-  unsigned long lastTick = 0;
-  unsigned long interval = 1000;
-
-  void init(unsigned long newInterval)
-  {
-    interval = newInterval;
-    lastTick = millis();
-  }
-
-  bool tick()
-  {
-    if(lastTick + interval <= millis())
-    {
-      lastTick = millis();
-      return true;
-    }
-    else
-    {
-      return false;
-    }
-  }
-
-} task_timer_t;
-
-task_timer_t t100;
+//Structure for handling timers
+virtualTimer_S tSuspot;
+virtualTimer_S tWheelSpeed;
+virtualTimer_S tBrakeTemp;
+virtualTimerGroup_S readTimer;
+virtualTimerGroup_S writeTimer;
 
 //Structure for handling wheel speed sensor values 
 typedef struct 
@@ -46,6 +25,12 @@ typedef struct
     pulseDuration = currentPulseTime - previousPulseTime;
     previousPulseTime = currentPulseTime; 
   }
+
+  void writeCAN()
+  {
+    // create can message and send??
+  }
+
 } wheel_speed_sensor_t;
 
 wheel_speed_sensor_t wheelSpeedSensor;
@@ -65,6 +50,11 @@ typedef struct
   {
     rawADCValue = analogRead(pin);
     value = rawADCValue * scalar + offset;
+  }
+
+  void writeCAN()
+  {
+    // create can message and send??
   }
 
 } brake_temperature_sensor_t;
@@ -88,6 +78,11 @@ typedef struct
     value = rawADCValue * scalar + offset;
   }
 
+  void writeCAN()
+  {
+    // create can message and send??
+  }
+
 } suspension_position_sensor_t;
 
 suspension_position_sensor_t suspensionPositionSensor;
@@ -109,25 +104,21 @@ void setup() {
   attachInterrupt(wheelSpeedSensor.pin, wheelSpeedISR, RISING); 
 
   //Initialize our timer(s)
-  t100.init(100);
+  tWheelSpeed.init(1, &(wheelSpeedSensor.readSensor()));
+  tSuspot.init(100, &(suspensionPositionSensor.readSensor()));
+  tBrakeTemp.init(1000, &(brakeTemperatureSensor.readSensor()));
 
+  readTimer.addTimer(&tWheelSpeed);
+  readTimer.addTimer(&tSuspot);
+  readTimer.addTimer(&tBrakeTemp);
+
+  writeTimer.addTimer(100, &(wheelSpeedSensor.writeCAN()));
+  writeTimer.addTimer(100, &(suspensionPositionSensor.writeCAN()));
+  writeTimer.addTimer(1000, &(brakeTemperatureSensor.writeCAN()));
 }
 
 void loop() {
-
-  if(t100.tick())
-  {
-    //Read Suspension Position
-    suspensionPositionSensor.readSensor();
-
-    //Read Brake Temperature
-    brakeTemperatureSensor.readSensor();
-
-    //Read Wheel Speed
-    wheelSpeedSensor.readSensor();
-
-    //Populate sensor values to CAN frame + transmit 
-
-  }
+  readTimer.tick();
+  writeTimer.tick();
 }
 

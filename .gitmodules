@@ -1,0 +1,3 @@
+[submodule "daqWheel/lib/CAN"]
+	path = daqWheel/lib/CAN
+	url = https://github.com/NU-Formula-Racing/CAN.git
