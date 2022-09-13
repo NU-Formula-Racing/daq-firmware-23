@@ -104,17 +104,17 @@ void setup() {
   attachInterrupt(wheelSpeedSensor.pin, wheelSpeedISR, RISING); 
 
   //Initialize our timer(s)
-  tWheelSpeed.init(1, &(wheelSpeedSensor.readSensor()));
-  tSuspot.init(100, &(suspensionPositionSensor.readSensor()));
-  tBrakeTemp.init(1000, &(brakeTemperatureSensor.readSensor()));
+  tWheelSpeed.init(1, wheelSpeedSensor.readSensor);
+  tSuspot.init(100, suspensionPositionSensor.readSensor);
+  tBrakeTemp.init(1000, brakeTemperatureSensor.readSensor);
 
   readTimer.addTimer(&tWheelSpeed);
   readTimer.addTimer(&tSuspot);
   readTimer.addTimer(&tBrakeTemp);
 
-  writeTimer.addTimer(100, &(wheelSpeedSensor.writeCAN()));
-  writeTimer.addTimer(100, &(suspensionPositionSensor.writeCAN()));
-  writeTimer.addTimer(1000, &(brakeTemperatureSensor.writeCAN()));
+  writeTimer.addTimer(100, wheelSpeedSensor.writeCAN);
+  writeTimer.addTimer(100, suspensionPositionSensor.writeCAN);
+  writeTimer.addTimer(1000, brakeTemperatureSensor.writeCAN);
 }
 
 void loop() {
