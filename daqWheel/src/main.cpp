@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include "pinDefs.h"
 #include "../lib/CAN/include/virtualTimer.h"
+#include "../lib/CAN/include/app_can.h"
 
 #define SERIAL_DEBUG
 
@@ -11,12 +12,16 @@ virtualTimer_S tBrakeTemp;
 virtualTimerGroup_S readTimer;
 virtualTimerGroup_S writeTimer;
 
+// TX CAN Message 
+app_can_message_t tx_msg;
+
 //Structure for handling wheel speed sensor values 
 typedef struct 
 {
   unsigned long currentPulseTime = 0;
   unsigned long previousPulseTime = 0;
   unsigned long pulseDuration = 0;
+  uint32_t value = 0;
   const int pin = WHEEL_SPEED_SENSOR_PIN;
 
   void readSensor()
@@ -24,11 +29,16 @@ typedef struct
     currentPulseTime = micros();
     pulseDuration = currentPulseTime - previousPulseTime;
     previousPulseTime = currentPulseTime; 
+    value = 0; // calculate this using pulse info
   }
 
   void writeCAN()
   {
     // create can message and send??
+    tx_msg.id = 0x400;
+    tx_msg.len = 0x6;
+    tx_msg.data = value;
+    app_can_write(&tx_msg);
   }
 
 } wheel_speed_sensor_t;
@@ -55,6 +65,10 @@ typedef struct
   void writeCAN()
   {
     // create can message and send??
+    tx_msg.id = 0x400;
+    tx_msg.len = 0x6;
+    tx_msg.data = value;
+    app_can_write(&tx_msg);
   }
 
 } brake_temperature_sensor_t;
@@ -81,6 +95,10 @@ typedef struct
   void writeCAN()
   {
     // create can message and send??
+    tx_msg.id = 0x400;
+    tx_msg.len = 0x6;
+    tx_msg.data = value;
+    app_can_write(&tx_msg);
   }
 
 } suspension_position_sensor_t;
