@@ -21,15 +21,26 @@ typedef struct
   unsigned long currentPulseTime = 0;
   unsigned long previousPulseTime = 0;
   unsigned long pulseDuration = 0;
-  uint32_t value = 0;
+  uint32_t wheelSpeed = 0;
   const int pin = WHEEL_SPEED_SENSOR_PIN;
 
-  void readSensor()
+  void readDuration()
   {
     currentPulseTime = micros();
     pulseDuration = currentPulseTime - previousPulseTime;
-    previousPulseTime = currentPulseTime; 
-    value = 0; // calculate this using pulse info
+    previousPulseTime = currentPulseTime;
+  }
+
+  void readSensor()
+  {
+    // Wheel constants
+    const float wheelCircumference = 1.26; //wheel circumference in m
+    const float MPStoMPH = 2.24; // m/s to MPH constant 
+    const int magnetCount = 20;
+    //We multiply by 1M because our pulseDuration is measured in uS
+    float pulseFrequency = 1000000.0 / (float)pulseDuration;
+    float wheelFrequency = pulseFrequency / (float)magnetCount; 
+    wheelSpeed = (uint32_t)(wheelFrequency * wheelCircumference * MPStoMPH);
   }
 
   void writeCAN()
@@ -107,7 +118,7 @@ suspension_position_sensor_t suspensionPositionSensor;
 
 //Interrupt function for handling wheel speed 
 void IRAM_ATTR wheelSpeedISR() {
-	wheelSpeedSensor.readSensor();
+	wheelSpeedSensor.readDuration();
 }
 
 void setup() {
@@ -122,7 +133,7 @@ void setup() {
   attachInterrupt(wheelSpeedSensor.pin, wheelSpeedISR, RISING); 
 
   //Initialize our timer(s)
-  tWheelSpeed.init(1, wheelSpeedSensor.readSensor);
+  tWheelSpeed.init(100, wheelSpeedSensor.readSensor);
   tSuspot.init(100, suspensionPositionSensor.readSensor);
   tBrakeTemp.init(1000, brakeTemperatureSensor.readSensor);
 
