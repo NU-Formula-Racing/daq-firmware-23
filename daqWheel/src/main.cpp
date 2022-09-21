@@ -4,6 +4,19 @@
 #include "../lib/CAN/include/app_can.h"
 
 #define SERIAL_DEBUG
+#define ARDUINO_TEENSY40
+
+#if defined(ARDUINO_TEENSY40) || defined(ARDUINO_TEENSY41)
+#include "teensy_can.h"
+// The bus number is a template argument for Teensy: TeensyCAN<bus_num>
+TeensyCAN<1> can_bus{};
+#endif
+
+#ifdef ARDUINO_ARCH_ESP32
+#include "esp_can.h"
+// The tx and rx pins are constructor arguments to ESPCan, which default to TX = 5, RX = 4
+ESPCan can_bus{};
+#endif
 
 //Structure for handling timers
 virtualTimer_S tSuspot;
@@ -12,8 +25,12 @@ virtualTimer_S tBrakeTemp;
 virtualTimerGroup_S readTimer;
 virtualTimerGroup_S writeTimer;
 
-// TX CAN Message 
-app_can_message_t tx_msg;
+// TX CAN Message
+int messageId = 0x400;
+CANSignal<uint16_t, 0, 8, CANTemplateConvertFloat(1), CANTemplateConvertFloat(0), true> wheelSpeedSignal{}; 
+CANSignal<uint16_t, 16, 8, CANTemplateConvertFloat(1), CANTemplateConvertFloat(0), true> brakeTempSignal{}; 
+CANSignal<uint16_t, 32, 8, CANTemplateConvertFloat(1), CANTemplateConvertFloat(0), true> susPotSignal{}; 
+CANTXMessage<3> tx_message{can_bus, messageId, 4, std::chrono::milliseconds{100}, wheelSpeedSignal, brakeTempSignal, susPotSignal};
 
 //Structure for handling wheel speed sensor values 
 typedef struct 
@@ -45,11 +62,7 @@ typedef struct
 
   void writeCAN()
   {
-    // create can message and send??
-    tx_msg.id = 0x400;
-    tx_msg.len = 0x6;
-    tx_msg.data = value;
-    app_can_write(&tx_msg);
+    wheelSpeedSignal = (uint16_t)wheelSpeed
   }
 
 } wheel_speed_sensor_t;
@@ -60,7 +73,7 @@ wheel_speed_sensor_t wheelSpeedSensor;
 typedef struct 
 {
   uint32_t rawADCValue = 0;
-  uint32_t value = 0;
+  uint16_t value = 0;
 
   const uint32_t scalar = BRAKE_TEMPERATURE_SCALAR;
   const uint32_t offset = BRAKE_TEMPERATURE_OFFSET;
@@ -75,11 +88,7 @@ typedef struct
 
   void writeCAN()
   {
-    // create can message and send??
-    tx_msg.id = 0x400;
-    tx_msg.len = 0x6;
-    tx_msg.data = value;
-    app_can_write(&tx_msg);
+    brakeTempSignal = (uint16_t)value;
   }
 
 } brake_temperature_sensor_t;
@@ -105,11 +114,7 @@ typedef struct
 
   void writeCAN()
   {
-    // create can message and send??
-    tx_msg.id = 0x400;
-    tx_msg.len = 0x6;
-    tx_msg.data = value;
-    app_can_write(&tx_msg);
+    susPotSignal = (uint16_t)value;
   }
 
 } suspension_position_sensor_t;
@@ -133,21 +138,22 @@ void setup() {
   attachInterrupt(wheelSpeedSensor.pin, wheelSpeedISR, RISING); 
 
   //Initialize our timer(s)
-  tWheelSpeed.init(100, wheelSpeedSensor.readSensor);
-  tSuspot.init(100, suspensionPositionSensor.readSensor);
-  tBrakeTemp.init(1000, brakeTemperatureSensor.readSensor);
-
-  readTimer.addTimer(&tWheelSpeed);
-  readTimer.addTimer(&tSuspot);
-  readTimer.addTimer(&tBrakeTemp);
+  readTimer.addTimer(100, wheelSpeedSensor.readSensor);
+  readTimer.addTimer(100, suspensionPositionSensor.readSensor);
+  readTimer.addTimer(1000, brakeTemperatureSensor.readSensor);
 
   writeTimer.addTimer(100, wheelSpeedSensor.writeCAN);
   writeTimer.addTimer(100, suspensionPositionSensor.writeCAN);
   writeTimer.addTimer(1000, brakeTemperatureSensor.writeCAN);
+
+  can_bus.Initialize(ICAN::BaudRate::kBaud1M);
 }
+
+std::chrono::milliseconds kTickPeriod{10};
 
 void loop() {
   readTimer.tick();
   writeTimer.tick();
+  tx_message.Tick(1000);
 }
 
