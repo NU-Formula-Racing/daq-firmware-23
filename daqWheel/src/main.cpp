@@ -73,7 +73,7 @@ wheel_speed_sensor_t wheelSpeedSensor;
 typedef struct 
 {
   uint32_t rawADCValue = 0;
-  uint16_t value = 0;
+  uint32_t value = 0;
 
   const uint32_t scalar = BRAKE_TEMPERATURE_SCALAR;
   const uint32_t offset = BRAKE_TEMPERATURE_OFFSET;
