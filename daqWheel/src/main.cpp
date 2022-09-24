@@ -149,11 +149,9 @@ void setup() {
   can_bus.Initialize(ICAN::BaudRate::kBaud1M);
 }
 
-std::chrono::milliseconds kTickPeriod{10};
-
 void loop() {
-  readTimer.tick();
-  writeTimer.tick();
-  tx_message.Tick(1000);
+  readTimer.tick(millis());
+  writeTimer.tick(millis());
+  tx_message.Tick(millis());
 }
 
