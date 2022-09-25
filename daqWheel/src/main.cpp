@@ -1,7 +1,7 @@
 #include <Arduino.h>
-#include "pinDefs.h"
 #include "../lib/CAN/include/virtualTimer.h"
 #include "../lib/CAN/include/app_can.h"
+#include "pinDefs.h"
 
 #define SERIAL_DEBUG
 #define ARDUINO_TEENSY40
@@ -19,111 +19,76 @@ ESPCan can_bus{};
 #endif
 
 //Structure for handling timers
-virtualTimer_S tSuspot;
-virtualTimer_S tWheelSpeed;
-virtualTimer_S tBrakeTemp;
-virtualTimerGroup_S readTimer;
-virtualTimerGroup_S writeTimer;
+virtualTimerGroup_S read_timer;
 
 // TX CAN Message
-int messageId = 0x400;
-CANSignal<uint16_t, 0, 8, CANTemplateConvertFloat(1), CANTemplateConvertFloat(0), true> wheelSpeedSignal{}; 
-CANSignal<uint16_t, 16, 8, CANTemplateConvertFloat(1), CANTemplateConvertFloat(0), true> brakeTempSignal{}; 
-CANSignal<uint16_t, 32, 8, CANTemplateConvertFloat(1), CANTemplateConvertFloat(0), true> susPotSignal{}; 
-CANTXMessage<3> tx_message{can_bus, messageId, 4, std::chrono::milliseconds{100}, wheelSpeedSignal, brakeTempSignal, susPotSignal};
+CANSignal<uint16_t, 0, 16, CANTemplateConvertFloat(0.1), CANTemplateConvertFloat(0), true> wheel_speed_signal{}; 
+CANSignal<uint16_t, 16, 16, CANTemplateConvertFloat(0.1), CANTemplateConvertFloat(-40), true> brake_temp_signal{}; 
+CANSignal<uint16_t, 32, 16, CANTemplateConvertFloat(1), CANTemplateConvertFloat(0), true> sus_pot_signal{}; 
+CANTXMessage<3> tx_message{can_bus, FL_CAN_FRAME_ADDRESS, 4, std::chrono::milliseconds{100}, wheel_speed_signal, brake_temp_signal, sus_pot_signal};
 
-//Structure for handling wheel speed sensor values 
-typedef struct 
+// Wheel speed sensor
+unsigned long current_pulse_time = 0;
+unsigned long previous_pulse_time = 0;
+unsigned long pulse_duration = 0;
+
+/**
+ * @brief Runs on interrupt to record pulse duration
+ * 
+ */
+void ReadWheelSpeedSensorDuration()
 {
-  unsigned long currentPulseTime = 0;
-  unsigned long previousPulseTime = 0;
-  unsigned long pulseDuration = 0;
-  uint32_t wheelSpeed = 0;
-  const int pin = WHEEL_SPEED_SENSOR_PIN;
+    current_pulse_time = micros();
+    pulse_duration = current_pulse_time - previous_pulse_time;
+    previous_pulse_time = current_pulse_time;
+}
 
-  void readDuration()
-  {
-    currentPulseTime = micros();
-    pulseDuration = currentPulseTime - previousPulseTime;
-    previousPulseTime = currentPulseTime;
-  }
-
-  void readSensor()
-  {
+/**
+ * @brief Uses the pulse duration to calculate the wheel speed in MPH
+ * 
+ */
+void ReadWheelSpeedSensor()
+{
     // Wheel constants
-    const float wheelCircumference = 1.26; //wheel circumference in m
-    const float MPStoMPH = 2.24; // m/s to MPH constant 
-    const int magnetCount = 20;
+    const float kWheelCircumference = 1.26; //wheel circumference in m
+    const float kMPStoMPH = 2.24; // m/s to MPH constant 
+    const int kMagnetCount = 20;
     //We multiply by 1M because our pulseDuration is measured in uS
-    float pulseFrequency = 1000000.0 / (float)pulseDuration;
-    float wheelFrequency = pulseFrequency / (float)magnetCount; 
-    wheelSpeed = (uint32_t)(wheelFrequency * wheelCircumference * MPStoMPH);
-  }
+    float pulse_frequency = 1000000.0 / (float)pulse_duration;
+    float wheel_frequency = pulse_frequency / (float)kMagnetCount; 
+    wheel_speed_signal = (uint16_t)(wheel_frequency * kWheelCircumference * kMPStoMPH);
+}
 
-  void writeCAN()
-  {
-    wheelSpeedSignal = (uint16_t)wheelSpeed
-  }
-
-} wheel_speed_sensor_t;
-
-wheel_speed_sensor_t wheelSpeedSensor;
-
-//Structure for handling brake temperature values
-typedef struct 
+// Brake temperature
+/**
+ * @brief Reads the brake temperature sensor ADC value and converts it to temperature units (degrees C)
+ * 
+ */
+void ReadBrakeTempSensor()
 {
-  uint32_t rawADCValue = 0;
-  uint32_t value = 0;
+  uint16_t raw_ADC_value = 0;
+  raw_ADC_value = analogRead(BRAKE_TEMPERATURE_SENSOR_PIN);
+  brake_temp_signal = raw_ADC_value * BRAKE_TEMPERATURE_SCALAR + BRAKE_TEMPERATURE_OFFSET;
+}
 
-  const uint32_t scalar = BRAKE_TEMPERATURE_SCALAR;
-  const uint32_t offset = BRAKE_TEMPERATURE_OFFSET;
-
-  const int pin = BRAKE_TEMPERATURE_SENSOR_PIN;
-
-  void readSensor()
-  {
-    rawADCValue = analogRead(pin);
-    value = rawADCValue * scalar + offset;
-  }
-
-  void writeCAN()
-  {
-    brakeTempSignal = (uint16_t)value;
-  }
-
-} brake_temperature_sensor_t;
-
-brake_temperature_sensor_t brakeTemperatureSensor;
-
-//Structure for handling suspension position values
-typedef struct 
+// Suspension position sensor
+/**
+ * @brief Reads the suspension position sensor ADC value and converts it to length (mm)
+ * 
+ */
+void ReadSuspensionPositionSensor()
 {
-  uint32_t rawADCValue = 0;
-  uint32_t value = 0;
+    uint16_t raw_ADC_value = 0;
+    raw_ADC_value = analogRead(SUSPENSION_POSITION_SENSOR_PIN);
+    sus_pot_signal = raw_ADC_value * SUSPENSION_POSITION_SCALAR + SUSPENSION_POSITION_OFFSET;
+}
 
-  const uint32_t scalar = SUSPENSION_POSITION_SCALAR;
-  const uint32_t offset = SUSPENSION_POSITION_OFFSET;
-
-  const int pin = SUSPENSION_POSITION_SENSOR_PIN;
-
-  void readSensor()
-  {
-    rawADCValue = analogRead(pin);
-    value = rawADCValue * scalar + offset;
-  }
-
-  void writeCAN()
-  {
-    susPotSignal = (uint16_t)value;
-  }
-
-} suspension_position_sensor_t;
-
-suspension_position_sensor_t suspensionPositionSensor;
-
-//Interrupt function for handling wheel speed 
-void IRAM_ATTR wheelSpeedISR() {
-	wheelSpeedSensor.readDuration();
+/**
+ * @brief Interrupt function for handling wheel speed
+ * 
+ */
+void IRAM_ATTR WheelSpeedISR() {
+	ReadWheelSpeedSensorDuration();
 }
 
 void setup() {
@@ -135,23 +100,18 @@ void setup() {
 
   //This only works on ESP32, will crash on compile for Teensy
   //This makes us trigger reading wheel speed in an interrupt 
-  attachInterrupt(wheelSpeedSensor.pin, wheelSpeedISR, RISING); 
+  attachInterrupt(WHEEL_SPEED_SENSOR_PIN, WheelSpeedISR, RISING); 
 
   //Initialize our timer(s)
-  readTimer.addTimer(100, wheelSpeedSensor.readSensor);
-  readTimer.addTimer(100, suspensionPositionSensor.readSensor);
-  readTimer.addTimer(1000, brakeTemperatureSensor.readSensor);
-
-  writeTimer.addTimer(100, wheelSpeedSensor.writeCAN);
-  writeTimer.addTimer(100, suspensionPositionSensor.writeCAN);
-  writeTimer.addTimer(1000, brakeTemperatureSensor.writeCAN);
+  read_timer.addTimer(100, ReadWheelSpeedSensor);
+  read_timer.addTimer(100, ReadBrakeTempSensor);
+  read_timer.addTimer(1000, ReadSuspensionPositionSensor);
 
   can_bus.Initialize(ICAN::BaudRate::kBaud1M);
 }
 
 void loop() {
-  readTimer.tick(millis());
-  writeTimer.tick(millis());
+  read_timer.tick(millis());
   tx_message.Tick(millis());
 }
 
