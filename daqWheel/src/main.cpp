@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include "../lib/CAN/include/virtualTimer.h"
 #include "../lib/CAN/include/app_can.h"
-#include "pinDefs.h"
+#include "../../daqPinDefs.cpp"
 
 #define SERIAL_DEBUG
 #define ARDUINO_TEENSY40
@@ -18,6 +18,10 @@ TeensyCAN<1> can_bus{};
 ESPCan can_bus{};
 #endif
 
+// Initialize board
+CANFrameAddress can_frame_address = FL_CAN_FRAME_ADDRESS;
+WheelBoard wheel_board(1, 2, 3, can_frame_address);
+
 //Structure for handling timers
 virtualTimerGroup_S read_timer;
 
@@ -25,7 +29,7 @@ virtualTimerGroup_S read_timer;
 CANSignal<uint16_t, 0, 16, CANTemplateConvertFloat(0.1), CANTemplateConvertFloat(0), true> wheel_speed_signal{}; 
 CANSignal<uint16_t, 16, 16, CANTemplateConvertFloat(0.1), CANTemplateConvertFloat(-40), true> brake_temp_signal{}; 
 CANSignal<uint16_t, 32, 16, CANTemplateConvertFloat(1), CANTemplateConvertFloat(0), true> sus_pot_signal{}; 
-CANTXMessage<3> tx_message{can_bus, FL_CAN_FRAME_ADDRESS, 4, std::chrono::milliseconds{100}, wheel_speed_signal, brake_temp_signal, sus_pot_signal};
+CANTXMessage<3> tx_message{can_bus, can_frame_address, 4, std::chrono::milliseconds{100}, wheel_speed_signal, brake_temp_signal, sus_pot_signal};
 
 // Wheel speed sensor
 unsigned long current_pulse_time = 0;
@@ -67,8 +71,8 @@ void ReadWheelSpeedSensor()
 void ReadBrakeTempSensor()
 {
   uint16_t raw_ADC_value = 0;
-  raw_ADC_value = analogRead(BRAKE_TEMPERATURE_SENSOR_PIN);
-  brake_temp_signal = raw_ADC_value * BRAKE_TEMPERATURE_SCALAR + BRAKE_TEMPERATURE_OFFSET;
+  raw_ADC_value = analogRead(wheel_board.brake_temp_sensor_pin);
+  brake_temp_signal = raw_ADC_value * wheel_board.brake_temp_scalar + wheel_board.brake_temp_offset;
 }
 
 // Suspension position sensor
