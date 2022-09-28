@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include "daqWheel.cpp"
+#include "daqWheel.h"
 
 #define SERIAL_DEBUG
 
@@ -51,11 +51,12 @@ void setup() {
   //This makes us trigger reading wheel speed in an interrupt 
   attachInterrupt(wheel_board.wheelSpeedSensorPin, WheelSpeedISR, RISING); 
 
+  // Initialize can bus
+  can_bus.Initialize(ICAN::BaudRate::kBaud1M);
+
   //Initialize our timer(s)
   read_timer.addTimer(100, ReadWheelSpeedSensor);
   read_timer.addTimer(100, ReadBrakeTempSensor);
-
-  can_bus.Initialize(ICAN::BaudRate::kBaud1M);
 }
 
 void loop() {
