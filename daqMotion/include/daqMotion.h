@@ -3,15 +3,18 @@
  * brake temp sensor pin, sus pos sensor pin, and can frame address.
  * 
  */
-class WheelBoard
+class MotionBoard
 {
     public:
-        static constexpr int wheelSpeedSensorPin = 1;
-        WheelBoard();
+        //variables 
+        //constructor bruh
+        MotionBoard();
+        //WheelBoard method
         void ReadWheelSpeedSensorDuration();
-        float ReadWheelSpeedSensor();
-        float ReadBrakeTempSensor();
-
+        //ReadGPS , ReadAmbientTempSensor, ReadAccelerometer
+        float ReadGPS();
+        float ReadAmbientTemp();
+        float ReadAccel();
     private:
         // pins
         static constexpr int brakeTempSensorPin = 2;

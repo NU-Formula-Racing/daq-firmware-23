@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include "daqWheel.h"
+#include "daqMotion.h"
 
 #define SERIAL_DEBUG
 
@@ -28,14 +28,16 @@ CANSignal<float, 16, 16, CANTemplateConvertFloat(0.1), CANTemplateConvertFloat(-
 CANTXMessage<3> tx_message{can_bus, can_frame_address, 4, std::chrono::milliseconds{100}, wheel_speed_signal, brake_temp_signal};
 
 
-void ReadWheelSpeedSensor() {
+void ReadGPS() {
 	wheel_speed_signal = wheel_board.ReadWheelSpeedSensor();
 }
 
-void ReadBrakeTempSensor() {
+void ReadAmbientTemp() {
 	brake_temp_signal = wheel_board.ReadBrakeTempSensor();
 }
-
+void ReadAccel() {
+  
+}
 void IRAM_ATTR WheelSpeedISR() {
 	wheel_board.ReadWheelSpeedSensorDuration();
 }
