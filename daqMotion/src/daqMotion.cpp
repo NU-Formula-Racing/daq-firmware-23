@@ -1,6 +1,5 @@
 #include <Arduino.h>
-#include <daqWheel.h>
-
+#include <daqMotion.h>
 /**
  * @brief Construct a new Wheel Board:: Wheel Board object
  * 
@@ -17,22 +16,16 @@ MotionBoard::MotionBoard()
  */
 float MotionBoard::ReadGPS()
 {
-
+    float hello = 10; 
+    return hello;
 };
-float ReadAmbientTemp()
+float MotionBoard::ReadAmbientTemp()
 {
-
+    float hello = 10; 
+    return hello;
 };
-float ReadAccel()
+float MotionBoard::ReadAccel()
 {
-
-};
-float 
-
-enum CANFrameAddress
-{
-    FL_CAN_FRAME_ADDRESS = 0x400,
-    FR_CAN_FRAME_ADDRESS = 0x401,
-    BL_CAN_FRAME_ADDRESS = 0x402,
-    BR_CAN_FRAME_ADDRESS = 0x403
+    float hello = 10; 
+    return hello;
 };

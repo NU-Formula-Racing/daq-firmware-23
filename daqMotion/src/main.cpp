@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include "daqMotion.h"
+#include "virtualTimer.h"
 
 #define SERIAL_DEBUG
 
@@ -12,34 +13,29 @@ TeensyCAN<1> can_bus{};
 #ifdef ARDUINO_ARCH_ESP32
 #include "esp_can.h"
 // The tx and rx pins are constructor arguments to ESPCan, which default to TX = 5, RX = 4
-ESPCan can_bus{};
+ESPCAN can_bus{};
 #endif
 
 // Initialize board
-CANFrameAddress can_frame_address = FL_CAN_FRAME_ADDRESS;
-WheelBoard wheel_board;
-
+MotionBoard motion_board; 
 //Structure for handling timers
-virtualTimerGroup_S read_timer;
+VirtualTimerGroup read_timer;
 
 // TX CAN Message
 CANSignal<float, 0, 16, CANTemplateConvertFloat(0.1), CANTemplateConvertFloat(0), false> wheel_speed_signal{}; 
 CANSignal<float, 16, 16, CANTemplateConvertFloat(0.1), CANTemplateConvertFloat(-40), false> brake_temp_signal{}; 
-CANTXMessage<3> tx_message{can_bus, can_frame_address, 4, std::chrono::milliseconds{100}, wheel_speed_signal, brake_temp_signal};
+CANTXMessage<2> tx_message{can_bus, 0x400, 4, 100, read_timer, wheel_speed_signal, brake_temp_signal};
 
 
 void ReadGPS() {
-	wheel_speed_signal = wheel_board.ReadWheelSpeedSensor();
+	wheel_speed_signal = motion_board.ReadGPS();
 }
 
 void ReadAmbientTemp() {
-	brake_temp_signal = wheel_board.ReadBrakeTempSensor();
+	brake_temp_signal = motion_board.ReadAmbientTemp();
 }
 void ReadAccel() {
   
-}
-void IRAM_ATTR WheelSpeedISR() {
-	wheel_board.ReadWheelSpeedSensorDuration();
 }
 
 void setup() {
@@ -51,18 +47,18 @@ void setup() {
 
   //This only works on ESP32, will crash on compile for Teensy
   //This makes us trigger reading wheel speed in an interrupt 
-  attachInterrupt(wheel_board.wheelSpeedSensorPin, WheelSpeedISR, RISING); 
+  //attachInterrupt(wheel_board.wheelSpeedSensorPin, WheelSpeedISR, RISING); 
 
   // Initialize can bus
   can_bus.Initialize(ICAN::BaudRate::kBaud1M);
 
   //Initialize our timer(s)
-  read_timer.addTimer(100, ReadWheelSpeedSensor);
-  read_timer.addTimer(100, ReadBrakeTempSensor);
+  read_timer.AddTimer(100, ReadGPS);
+  read_timer.AddTimer(100, ReadAmbientTemp);
+
 }
 
 void loop() {
-  read_timer.tick(millis());
-  tx_message.Tick(millis());
+  read_timer.Tick(millis());
 }
 
