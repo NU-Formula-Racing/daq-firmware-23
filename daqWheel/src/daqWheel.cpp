@@ -52,11 +52,3 @@ float WheelBoard::ReadBrakeTempSensor()
     raw_ADC_value = analogRead(brakeTempSensorPin);
     return (float)raw_ADC_value * brakeTempScalar + brakeTempOffset;
 }
-
-enum CANFrameAddress
-{
-    FL_CAN_FRAME_ADDRESS = 0x400,
-    FR_CAN_FRAME_ADDRESS = 0x401,
-    BL_CAN_FRAME_ADDRESS = 0x402,
-    BR_CAN_FRAME_ADDRESS = 0x403
-};
