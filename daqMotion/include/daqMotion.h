@@ -15,6 +15,7 @@ class MotionBoard
         float ReadGPS();
         float ReadAmbientTemp();
         float ReadAccel();
+        bool setupMotionBoard();
     private:
         // pins
         static constexpr int brakeTempSensorPin = 2;
@@ -25,4 +26,6 @@ class MotionBoard
         unsigned long current_pulse_time;
         unsigned long previous_pulse_time;
         unsigned long pulse_duration;
+
+        // imu and gps 
 };

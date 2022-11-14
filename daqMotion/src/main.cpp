@@ -4,17 +4,13 @@
 
 #define SERIAL_DEBUG
 
-#if defined(ARDUINO_TEENSY40) || defined(ARDUINO_TEENSY41)
-#include "teensy_can.h"
-// The bus number is a template argument for Teensy: TeensyCAN<bus_num>
-TeensyCAN<1> can_bus{};
-#endif
-
 #ifdef ARDUINO_ARCH_ESP32
 #include "esp_can.h"
 // The tx and rx pins are constructor arguments to ESPCan, which default to TX = 5, RX = 4
 ESPCAN can_bus{};
 #endif
+
+
 
 // Initialize board
 MotionBoard motion_board; 
@@ -50,6 +46,12 @@ void setup() {
   read_timer.AddTimer(100, ReadGPS);
   read_timer.AddTimer(100, ReadAccel);
 
+
+// initalize the IMU and GPS sensor
+if  (! motion_board.setupMotionBoard() ) {
+  Serial.print("failed to properly set up the motionBoard");
+  while(1);
+}
 }
 
 void loop() {
