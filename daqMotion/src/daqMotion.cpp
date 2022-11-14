@@ -25,38 +25,55 @@ MotionBoard::MotionBoard()
     pulse_duration = 0;
 };
 
-bool MotionBoard::setupMotionBoard() {
+void MotionBoard::setupMotionBoard() {
+    //wire is needed for both
     Wire.begin();
+
     //IMU
     if( !(myIMU.begin()) ) {
-        //Serial.print if you can
-         return false;
+        Serial.print("IMU not detected at default I2C address. \n" );
     }
     if(! (myIMU.initialize(BASIC_SETTINGS)) ) {
-        //Serial.print if you can
-        return false;
+        Serial.print("couldn't set up the basic settings for IMU \n" );
     }
+    //GPS
     if (myGNSS.begin() == false) //Connect to the u-blox module using Wire port
     {
-        //Serial.println(F("u-blox GNSS not detected at default I2C address. Please check wiring. Freezing."));
-        return false;
-        //while (1);
+        Serial.println(F("u-blox GNSS not detected at default I2C address. Please check wiring. Freezing. \n"));
+        while(1);
     }
-
     myGNSS.setI2COutput(COM_TYPE_UBX); //Set the I2C port to output UBX only (turn off NMEA noise)
     myGNSS.saveConfigSelective(VAL_CFG_SUBSEC_IOPORT); //Save (only) the communications port settings to flash and BBR
-
-
-    return true; 
 }
-/**
- */
-float MotionBoard::ReadGPS()
+
+float* MotionBoard::ReadGPS()
 {
-    long latitude = myGNSS.getLatitude();
-    return latitude;
+    float lat = (float) myGNSS.getLatitude();
+    float lon = (float) myGNSS.getLongitude();
+
+    Serial.print("lat:");
+    Serial.println(lat);
+    Serial.print("long:");
+    Serial.println(lon);
+    
+    //is this sus lol
+    static float package[2] = {lat,lon};
+    return package;
 };
-float MotionBoard::ReadAccel()
+float* MotionBoard::ReadAccel()
 {
-    return myIMU.readFloatAccelY();
+    float x = (float) myIMU.readFloatAccelX();
+    float y =  (float) myIMU.readFloatAccelY();
+    float z = (float) myIMU.readFloatAccelZ();
+    static float package[3] = {x,y,z};
+    return package;
+};
+
+float* MotionBoard::ReadGyro()
+{
+    float x = (float) myIMU.readFloatGyroX();
+    float y =  (float) myIMU.readFloatGyroY();
+    float z = (float) myIMU.readFloatGyroZ();
+    static float package[3] = {x,y,z};
+    return package;
 };

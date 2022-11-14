@@ -6,18 +6,17 @@
 class MotionBoard
 {
     public:
-        //variables 
-        //constructor bruh
+        //constructor
         MotionBoard();
-        //WheelBoard method
-        void ReadWheelSpeedSensorDuration();
-        //ReadGPS , ReadAmbientTempSensor, ReadAccelerometer
-        float ReadGPS();
-        float ReadAmbientTemp();
-        float ReadAccel();
-        bool setupMotionBoard();
+        //Sensor Readings 
+        float* ReadGPS();
+        float* ReadAccel();
+        float* ReadGyro();
+        //setup
+        void setupMotionBoard();
     private:
-        // pins
+        // pins : TODO 
+
         static constexpr int brakeTempSensorPin = 2;
         // scalars and offsets
         static constexpr float brakeTempScalar = 1;
