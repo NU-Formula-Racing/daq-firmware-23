@@ -46,18 +46,18 @@ CANTXMessage<2> gps_messaage{can_bus, kGPS_CAN, 8, 10, read_timer, lon_signal, l
 //can transmit rate  check on sensor spread sheet 
 void ReadGPS() {
 	float* gps =  motion_board.ReadGPS();
-  //lat_signal = gps[0], lon_signal = gps[1];
+  lat_signal = gps[0], lon_signal = gps[1];
 }
 
 void ReadAccel() {
   float* accel = motion_board.ReadAccel();
   //setting the signals
- //accel_x = accel[0], accel_y = accel[1], accel_z = accel[2];
+  accel_x = accel[0], accel_y = accel[1], accel_z = accel[2];
 }
 void ReadGyro() {
   float* gyro = motion_board.ReadGyro();
   //setting the signals
-  //gyro_x = gyro[0], gyro_y = gyro[1], gyro_z = gyro[2];
+  gyro_x = gyro[0], gyro_y = gyro[1], gyro_z = gyro[2];
 
 }
 void setup() {
