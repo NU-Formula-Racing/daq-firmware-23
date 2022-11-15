@@ -14,29 +14,31 @@ const int kGPS_CAN = 0x430;
 const int kACCEL_CAN = 0x431;
 const int kGYRO_CAN = 0x432;
 const int kGYRO_2_CAN = 0x432;
+//factors and offsets
+static constexpr float imuFactor = 0.0005;
+static constexpr float imuOffset = 0;
+static constexpr float gpsFactor =  1e-07;
+static constexpr float gpsOffset = 0;
 
 // Initialize board
 MotionBoard motion_board; 
 //Structure for handling timers
 VirtualTimerGroup read_timer;
 
-//  CAN Signal
-/*
-CANSignal<SignalType,start_position, length, factor, offset, is_signed> 
- */
-
+//CANSignal<SignalType,start_position, length, factor, offset, is_signed> 
 //TODO: customize the template arguments
-CANSignal<float, 0, 16, CANTemplateConvertFloat(0.1), CANTemplateConvertFloat(0), false> accel_x{}; 
-CANSignal<float, 16, 16, CANTemplateConvertFloat(0.1), CANTemplateConvertFloat(-40), false> accel_y{}; 
-CANSignal<float, 16, 16, CANTemplateConvertFloat(0.1), CANTemplateConvertFloat(-40), false> accel_z{}; 
+CANSignal<float, 0, 24, CANTemplateConvertFloat(gpsFactor), CANTemplateConvertFloat(0), true> lat_signal{}; 
+CANSignal<float, 32, 24, CANTemplateConvertFloat(gpsFactor), CANTemplateConvertFloat(0), true> lon_signal{}; 
+
+CANSignal<float, 0, 16, CANTemplateConvertFloat(imuFactor), CANTemplateConvertFloat(0), true> accel_x{}; 
+CANSignal<float, 16, 32, CANTemplateConvertFloat(imuFactor), CANTemplateConvertFloat(0), true> accel_y{}; 
+CANSignal<float, 32, 48, CANTemplateConvertFloat(imuFactor), CANTemplateConvertFloat(0), true> accel_z{}; 
+
+CANSignal<float, 0, 16, CANTemplateConvertFloat(imuFactor), CANTemplateConvertFloat(0), true> gyro_x{}; 
+CANSignal<float, 16, 32, CANTemplateConvertFloat(imuFactor), CANTemplateConvertFloat(0), true> gyro_y{}; 
+CANSignal<float, 32, 48, CANTemplateConvertFloat(imuFactor), CANTemplateConvertFloat(0), true> gyro_z{}; 
 
 
-CANSignal<float, 16, 16, CANTemplateConvertFloat(0.1), CANTemplateConvertFloat(-40), false> gyro_x{}; 
-CANSignal<float, 16, 16, CANTemplateConvertFloat(0.1), CANTemplateConvertFloat(-40), false> gyro_y{}; 
-CANSignal<float, 16, 16, CANTemplateConvertFloat(0.1), CANTemplateConvertFloat(-40), false> gyro_z{}; 
-
-CANSignal<float, 16, 16, CANTemplateConvertFloat(0.1), CANTemplateConvertFloat(-40), true> lon_signal{}; 
-CANSignal<float, 16, 16, CANTemplateConvertFloat(0.1), CANTemplateConvertFloat(-40), true> lat_signal{}; 
 
 
 CANTXMessage<3> tx_message{can_bus, kACCEL_CAN, 4, 100, read_timer, accel_x, accel_y, accel_z};
