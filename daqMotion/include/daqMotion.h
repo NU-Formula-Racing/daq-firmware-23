@@ -18,7 +18,9 @@ class MotionBoard
         // pins : TODO 
 
         static constexpr int brakeTempSensorPin = 2;
-        // scalars and offsets
+
+
+
         static constexpr float brakeTempScalar = 1;
         static constexpr float brakeTempOffset = 0;
         // wheel speed sensor

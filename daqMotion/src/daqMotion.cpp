@@ -30,7 +30,7 @@ void MotionBoard::setupMotionBoard() {
     Wire.begin();
 
     //IMU
-    if( !(myIMU.begin()) ) {
+    if(myIMU.begin() == false ) {
         Serial.print("IMU not detected at default I2C address. \n" );
     }
     if(! (myIMU.initialize(BASIC_SETTINGS)) ) {
@@ -40,7 +40,7 @@ void MotionBoard::setupMotionBoard() {
     if (myGNSS.begin() == false) //Connect to the u-blox module using Wire port
     {
         Serial.println(F("u-blox GNSS not detected at default I2C address. Please check wiring. Freezing. \n"));
-        while(1);
+        //while(1);
     }
     myGNSS.setI2COutput(COM_TYPE_UBX); //Set the I2C port to output UBX only (turn off NMEA noise)
     myGNSS.saveConfigSelective(VAL_CFG_SUBSEC_IOPORT); //Save (only) the communications port settings to flash and BBR
@@ -65,6 +65,12 @@ float* MotionBoard::ReadAccel()
     float x = (float) myIMU.readFloatAccelX();
     float y =  (float) myIMU.readFloatAccelY();
     float z = (float) myIMU.readFloatAccelZ();
+        Serial.print("accel x:");
+    Serial.println(x);
+    Serial.print("accel_y:");
+    Serial.println(y);
+       Serial.print("accel_z:");
+    Serial.println(z);
     static float package[3] = {x,y,z};
     return package;
 };
