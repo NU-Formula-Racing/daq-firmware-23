@@ -13,8 +13,8 @@ ESPCAN can_bus{};
 const int kGPS_CAN = 0x430;
 const int kACCEL_CAN = 0x431;
 const int kGYRO_CAN = 0x432;
-const int kGYRO_2_CAN = 0x432;
-//factors and offsets
+// const int kGYRO_2_CAN = 0x432;
+//factors and offsetsx`
 const float imuFactor = 0.0005;
 const float imuOffset = 0;
 const float gpsFactor =  1e-07; 
@@ -28,8 +28,8 @@ VirtualTimerGroup read_timer;
 
 //CANSignal<SignalType,start_position, length, factor, offset, is_signed> 
 
-CANSignal<float, 0, 32, CANTemplateConvertFloat(1e-07), CANTemplateConvertFloat(0), true> lat_signal{}; 
-CANSignal<float, 32, 32, CANTemplateConvertFloat(1e-07), CANTemplateConvertFloat(0), true> lon_signal{}; 
+CANSignal<float, 0, 32, CANTemplateConvertFloat(1e-5), CANTemplateConvertFloat(0), true> lat_signal{}; 
+CANSignal<float, 32, 32, CANTemplateConvertFloat(1e-5), CANTemplateConvertFloat(0), true> lon_signal{}; 
 
 CANSignal<float, 0, 16, CANTemplateConvertFloat(0.0005), CANTemplateConvertFloat(0), true> accel_x{}; 
 CANSignal<float, 16, 16, CANTemplateConvertFloat(0.0005), CANTemplateConvertFloat(0), true> accel_y{}; 
@@ -47,12 +47,26 @@ CANTXMessage<2> gps_messaage{can_bus, kGPS_CAN, 8, 10, read_timer, lon_signal, l
 void ReadGPS() {
 	float* gps =  motion_board.ReadGPS();
   lat_signal = gps[0], lon_signal = gps[1];
+  Serial.print(gps[0]);
+  Serial.print(" ");
+  Serial.print(gps[1]);
+  Serial.print(" ");
+  Serial.print(gps[2]);
+  Serial.print(" ");
+  Serial.println();
 }
 
 void ReadAccel() {
   float* accel = motion_board.ReadAccel();
   //setting the signals
   accel_x = accel[0], accel_y = accel[1], accel_z = accel[2];
+    Serial.print(accel[0]);
+  Serial.print(" ");
+  Serial.print(accel[1]);
+  Serial.print(" ");
+  Serial.print(accel[2]);
+  Serial.print(" ");
+  Serial.println();
 }
 void ReadGyro() {
   float* gyro = motion_board.ReadGyro();
@@ -68,13 +82,12 @@ void setup() {
 
   // Initialize can bus
   can_bus.Initialize(ICAN::BaudRate::kBaud1M);
-  Serial.print("hiJ");
   // initalize the IMU and GPS sensor
   motion_board.setupMotionBoard();
   //Initialize our timers
   read_timer.AddTimer(100, ReadGPS);
-  read_timer.AddTimer(10, ReadAccel);
-  read_timer.AddTimer(10,ReadGyro);
+  read_timer.AddTimer(100, ReadAccel);
+  read_timer.AddTimer(100,ReadGyro);
   //sampling rate
 
 }

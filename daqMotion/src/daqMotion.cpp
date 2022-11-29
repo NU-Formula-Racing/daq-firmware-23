@@ -30,12 +30,14 @@ void MotionBoard::setupMotionBoard() {
     Wire.begin();
 
     //IMU
+    
     if(myIMU.begin() == false ) {
         Serial.print("IMU not detected at default I2C address. \n" );
     }
     if(! (myIMU.initialize(BASIC_SETTINGS)) ) {
         Serial.print("couldn't set up the basic settings for IMU \n" );
-    }
+    } 
+    
     //GPS
     if (myGNSS.begin() == false) //Connect to the u-blox module using Wire port
     {
@@ -44,18 +46,19 @@ void MotionBoard::setupMotionBoard() {
     }
     myGNSS.setI2COutput(COM_TYPE_UBX); //Set the I2C port to output UBX only (turn off NMEA noise)
     myGNSS.saveConfigSelective(VAL_CFG_SUBSEC_IOPORT); //Save (only) the communications port settings to flash and BBR
+    
 }
 
 float* MotionBoard::ReadGPS()
 {
-    float lat = (float) myGNSS.getLatitude();
-    float lon = (float) myGNSS.getLongitude();
-
-    Serial.print("lat:");
-    Serial.println(lat);
-    Serial.print("long:");
-    Serial.println(lon);
-    
+    // Serial.print("lat:");
+    long latitude = myGNSS.getLatitude() * 1e-07 ;
+    // Serial.println(  myGNSS.getLatitude() * 1e-07 );
+    // Serial.print("long: ");
+    // Serial.print(myGNSS.getSIV());
+    // Serial.println(  myGNSS.getLongitude()*1e-07);
+    float lat = (float) myGNSS.getLatitude() *1e-07 ;
+    float lon = (float) myGNSS.getLongitude()* 1e-07;
     //is this sus lol
     static float package[2] = {lat,lon};
     return package;
@@ -65,12 +68,12 @@ float* MotionBoard::ReadAccel()
     float x = (float) myIMU.readFloatAccelX();
     float y =  (float) myIMU.readFloatAccelY();
     float z = (float) myIMU.readFloatAccelZ();
-        Serial.print("accel x:");
-    Serial.println(x);
-    Serial.print("accel_y:");
-    Serial.println(y);
-       Serial.print("accel_z:");
-    Serial.println(z);
+    //     // Serial.print("accel x:");
+    // Serial.println(x);
+    // // Serial.print("accel_y:");
+    // Serial.println(y);
+    //    Serial.print("accel_z:");
+    // Serial.println(z);
     static float package[3] = {x,y,z};
     return package;
 };
