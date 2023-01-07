@@ -57,8 +57,8 @@ float* MotionBoard::ReadGPS()
     // Serial.print("long: ");
     // Serial.print(myGNSS.getSIV());
     // Serial.println(  myGNSS.getLongitude()*1e-07);
-    float lat = (float) myGNSS.getLatitude() *1e-07 ;
-    float lon = (float) myGNSS.getLongitude()* 1e-07;
+    float lat = (float) myGNSS.getLatitude();
+    float lon = (float) myGNSS.getLongitude();
     //is this sus lol
     static float package[2] = {lat,lon};
     return package;
