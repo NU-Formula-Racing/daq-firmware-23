@@ -45,36 +45,36 @@ CANTXMessage<3> gyro_message{can_bus, kGYRO_CAN, 6, 10, read_timer, gyro_x, gyro
 CANTXMessage<2> gps_messaage{can_bus, kGPS_CAN, 8, 10, read_timer, lat_signal, lon_signal}; 
 //can transmit rate  check on sensor spread sheet 
 void ReadGPS() {
-	float* gps =  motion_board.ReadGPS();
-  lat_signal = gps[0], lon_signal = gps[1];
-  Serial.println();
-  Serial.print("GPS: ");
-  Serial.print(lat_signal);
-  Serial.print(" ");
-  Serial.print(lon_signal);
-  Serial.print(" ");
-  // Serial.print(gps[2], 10);
+	lat_signal =  motion_board.ReadLat();
+  lon_signal = motion_board.ReadLon();
+  // Serial.println();
+  // Serial.print("GPS: ");
+  // Serial.print(lat_signal);
+  // Serial.print(" ");
+  // Serial.print(lon_signal);
   // Serial.print(" ");
   // Serial.println();
 }
 
 void ReadAccel() {
-  float* accel = motion_board.ReadAccel();
-  //setting the signals
-  accel_x = accel[0], accel_y = accel[1], accel_z = accel[2];
-  Serial.print("Accel: ");
-  Serial.print(accel[0]);
-  Serial.print(" ");
-  Serial.print(accel[1]);
-  Serial.print(" ");
-  Serial.print(accel[2]);
-  Serial.print(" ");
-  Serial.println();
+  accel_x = motion_board.ReadXAccel();
+  accel_y = motion_board.ReadYAccel();
+  accel_z = motion_board.ReadZAccel();
+  // Serial.print(accel_x);
+  // Serial.println();
 }
 void ReadGyro() {
-  float* gyro = motion_board.ReadGyro();
   //setting the signals
-  gyro_x = gyro[0], gyro_y = gyro[1], gyro_z = gyro[2];
+  gyro_x = motion_board.ReadXGyro();
+  gyro_y = motion_board.ReadYGyro();
+  gyro_z = motion_board.ReadZGyro();
+  // Serial.print("Gyro: ");
+  //   Serial.print(gyro_x);
+  // Serial.print(" ");
+  // Serial.print(gyro_y);
+  // Serial.print(" ");
+  // Serial.print(gyro_z);
+  // Serial.println();
 
 }
 void setup() {

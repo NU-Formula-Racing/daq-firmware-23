@@ -48,41 +48,36 @@ void MotionBoard::setupMotionBoard() {
     myGNSS.saveConfigSelective(VAL_CFG_SUBSEC_IOPORT); //Save (only) the communications port settings to flash and BBR
     
 }
-
-float* MotionBoard::ReadGPS()
-{
-    // Serial.print("lat:");
-    long latitude = myGNSS.getLatitude() * 1e-07 ;
-    // Serial.println(  myGNSS.getLatitude() * 1e-07 );
-    // Serial.print("long: ");
-    // Serial.print(myGNSS.getSIV());
-    // Serial.println(  myGNSS.getLongitude()*1e-07);
+//lattitude 
+float MotionBoard::ReadLat() {
     float lat = (float) myGNSS.getLatitude();
+    return lat;
+}
+//longitude
+float MotionBoard::ReadLon() {
     float lon = (float) myGNSS.getLongitude();
-    //is this sus lol
-    static float package[2] = {lat,lon};
-    return package;
+    return lon;
+}
+
+//units in g
+float MotionBoard::ReadXAccel() {
+    return myIMU.readFloatAccelX();
 };
-float* MotionBoard::ReadAccel()
-{
-    float x = (float) myIMU.readFloatAccelX();
-    float y =  (float) myIMU.readFloatAccelY();
-    float z = (float) myIMU.readFloatAccelZ();
-    //     // Serial.print("accel x:");
-    // Serial.println(x);
-    // // Serial.print("accel_y:");
-    // Serial.println(y);
-    //    Serial.print("accel_z:");
-    // Serial.println(z);
-    static float package[3] = {x,y,z};
-    return package;
+float MotionBoard::ReadYAccel() {
+    return myIMU.readFloatAccelY();
+};
+float MotionBoard::ReadZAccel() {
+    return myIMU.readFloatAccelZ();
 };
 
-float* MotionBoard::ReadGyro()
-{
-    float x = (float) myIMU.readFloatGyroX();
-    float y =  (float) myIMU.readFloatGyroY();
-    float z = (float) myIMU.readFloatGyroZ();
-    static float package[3] = {x,y,z};
-    return package;
+//Gyro units in degrees per second (dps)
+float MotionBoard::ReadXGyro() {
+    return myIMU.readFloatGyroX();
 };
+
+float MotionBoard::ReadYGyro() {
+    return myIMU.readFloatGyroY();
+}
+float MotionBoard::ReadZGyro() {
+    return myIMU.readFloatGyroZ();
+}

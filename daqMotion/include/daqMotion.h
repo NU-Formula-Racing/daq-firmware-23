@@ -8,10 +8,18 @@ class MotionBoard
     public:
         //constructor
         MotionBoard();
-        //Sensor Readings 
-        float* ReadGPS();
-        float* ReadAccel();
-        float* ReadGyro();
+        //Sensor Readings: : 
+        //accelerometer 
+        float ReadXAccel();
+        float ReadYAccel();
+        float ReadZAccel();
+        //gyroscope
+        float ReadXGyro();
+        float ReadYGyro();
+        float ReadZGyro();
+        //GPS
+        float ReadLat();
+        float ReadLon();
         //setup
         void setupMotionBoard();
     private:
