@@ -26,6 +26,15 @@ CANSignal<float, 32, 16, CANTemplateConvertFloat(0.1), CANTemplateConvertFloat(-
 // Transmit motor_temp_signal and coolant_temp_signal.
 CANTXMessage<1> tx_message{can_bus, temp_board.kCANId, 6, 100, read_timer, ambient_temp_signal};
 
+// Calculate coolant flow rate.
+void PrintCoolantFlowRate()
+{
+  float coolant_flow_rate = temp_board.CoolantFlowRate();
+  Serial.printf("Flow Count: %d\nFlow Rate : %.2f L/hour\n", temp_board.flowCount, coolant_flow_rate);
+  // Reset flowCount
+  temp_board.flowCount = 0;
+}
+
 // Read ambient temp sensor and convert to temperature units in Celsius.
 void ReadAmbientTempSensor()
 {
@@ -48,12 +57,15 @@ void setup()
 
   // Initialize our timer(s)
   read_timer.AddTimer(100, ReadAmbientTempSensor);
+  // read_timer.AddTimer(200, PrintCoolantFlowRate);
 }
 
 void loop()
 {
   delay(0);
+  // delay(temp_board.delayTime);
   read_timer.Tick(millis());
+  // PrintCoolantFlowRate();
 
   // Does not work currently but will work when the CAN
   // library is fixed.

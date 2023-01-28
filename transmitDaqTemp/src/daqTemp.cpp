@@ -25,3 +25,15 @@ float TempBoard::ReadAmbientTempSensor()
     temperature = temperature - 273.15;
     return temperature;
 }
+
+float TempBoard::CoolantFlowRate()
+{
+    float dtInSec = 1000 / (float)delayTime;
+    float flowRate = flowCount * dtInSec * 60 / 7.5;
+    return flowRate;
+}
+
+void TempBoard::UpdateFlowCount()
+{
+    flowCount++;
+}

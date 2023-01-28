@@ -1,6 +1,8 @@
 #include <Arduino.h>
-#include "daqTemp.h"
+// #include "daqTemp.h"
+#include "inverter.h"
 #include "virtualTimer.h"
+#include "can_interface.h"
 
 #define SERIAL_DEBUG
 
@@ -16,28 +18,23 @@ ESPCAN can_bus{};
 #endif
 
 // Initialize board
-TempBoard temp_board;
+// TempBoard temp_board;
+DaqTemp temp_board(can_bus);
 
 // Structure for handling timers
 VirtualTimerGroup read_timer;
 
 // Set up for ambient_temp_signal.
-CANSignal<float, 0, 16, CANTemplateConvertFloat(0.1), CANTemplateConvertFloat(-40), false> ambient_temp_rx_signal{};
+// CANSignal<float, 0, 16, CANTemplateConvertFloat(0.1), CANTemplateConvertFloat(-40), false> ambient_temp_rx_signal{};
 // Transmit motor_temp_signal and coolant_temp_signal.
-CANRXMessage<1> rx_message{can_bus, temp_board.kCANId, ambient_temp_rx_signal};
-
-// Read ambient temp sensor and convert to temperature units in Celsius.
-// void ReadAmbientTempSensor()
-// {
-//   ambient_temp_signal = temp_board.ReadAmbientTempSensor();
-// }
+// CANRXMessage<1> rx_message{can_bus, temp_board.kCANId, ambient_temp_rx_signal};
 
 void receiveTemp()
 {
   can_bus.Tick();
   Serial.print("Received: ");
   Serial.print("Temperature = ");
-  Serial.print(float(ambient_temp_rx_signal));
+  Serial.print(temp_board.GetAmbientTemp());
   Serial.print(" degrees Celsius \n");
 }
 
@@ -58,5 +55,6 @@ void setup()
 
 void loop()
 {
+  can_bus.Tick();
   read_timer.Tick(millis());
 }
