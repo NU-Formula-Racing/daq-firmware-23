@@ -1,14 +1,17 @@
 #include <Arduino.h>
 #include <daqTemp.h>
-#include <math.h>
 
 /**
- * @brief Construct a new Temp Board:: Temp Board Object
- *
- * @param can_frame
+ * @brief Constructor to setup pins and other configurations.
  */
-
-TempBoard::TempBoard(){};
+TempBoard::TempBoard()
+{
+    // Enable interrupts.
+    sei();
+    // Specify both pins as an input.
+    pinMode(temp_pin, INPUT);
+    pinMode(flow_pin, INPUT);
+}
 
 /**
  * @brief Reads the ambient temperature sensor ADC value and converts it to temperature units (degrees C).
@@ -26,14 +29,14 @@ float TempBoard::ReadAmbientTempSensor()
     return temperature;
 }
 
-float TempBoard::CoolantFlowRate()
+/**
+ * @brief Uses the flow count (amount of rising edges) and the change in time to calculate the flow rate (L/Hour).
+ *
+ * @return float
+ */
+float TempBoard::ReadCoolantFlowRate()
 {
-    float dtInSec = 1000 / (float)delayTime;
+    int dtInSec = 2;
     float flowRate = flowCount * dtInSec * 60 / 7.5;
     return flowRate;
-}
-
-void TempBoard::UpdateFlowCount()
-{
-    flowCount++;
 }

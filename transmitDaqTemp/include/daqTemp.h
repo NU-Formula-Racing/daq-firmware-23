@@ -8,24 +8,22 @@ class TempBoard
 public:
     // Constructor
     TempBoard();
+
     // Methods
     float ReadAmbientTempSensor();
-    float CoolantFlowRate();
-    void UpdateFlowCount();
+    float ReadCoolantFlowRate();
 
     // CAN address.
     const uint16_t kCANId{0x420};
 
-    // Coolant Flow Count Value
-    unsigned int flowCount;
-
-    const int delayTime = 500;
-
-private:
     /// Pins
     static constexpr int temp_pin = A0;
     static constexpr int flow_pin = A7;
 
+    // Coolant Flow Count Value
+    unsigned int flowCount;
+
+private:
     /// Scalars & Offsets
 
     // General Constants

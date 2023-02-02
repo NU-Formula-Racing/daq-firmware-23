@@ -26,16 +26,23 @@ CANSignal<float, 32, 16, CANTemplateConvertFloat(0.1), CANTemplateConvertFloat(-
 // Transmit motor_temp_signal and coolant_temp_signal.
 CANTXMessage<1> tx_message{can_bus, temp_board.kCANId, 6, 100, read_timer, ambient_temp_signal};
 
-// Calculate coolant flow rate.
-void PrintCoolantFlowRate()
+// Read coolant flow rate and print value.
+void ReadCoolantFlowRate()
 {
-  float coolant_flow_rate = temp_board.CoolantFlowRate();
+  float coolant_flow_rate = temp_board.ReadCoolantFlowRate();
   Serial.printf("Flow Count: %d\nFlow Rate : %.2f L/hour\n", temp_board.flowCount, coolant_flow_rate);
-  // Reset flowCount
+  // Reset flowCount.
   temp_board.flowCount = 0;
 }
 
-// Read ambient temp sensor and convert to temperature units in Celsius.
+// Update flow count every rising edge (change from 0 to 1).
+// This could not be implemented in the tempboard constructor.
+void UpdateFlowCount()
+{
+  temp_board.flowCount++;
+}
+
+// Read ambient temp sensor and print temperature (Celsius).
 void ReadAmbientTempSensor()
 {
   ambient_temp_signal = temp_board.ReadAmbientTempSensor();
@@ -55,19 +62,20 @@ void setup()
   // Initialize CAN bus.
   can_bus.Initialize(ICAN::BaudRate::kBaud1M);
 
-  // Initialize our timer(s)
-  read_timer.AddTimer(100, ReadAmbientTempSensor);
-  // read_timer.AddTimer(200, PrintCoolantFlowRate);
+  // Update flow count for every rising edge (0 to 1).
+  // This could not be implemented in the tempboard constructor.
+  attachInterrupt(temp_board.flow_pin, UpdateFlowCount, RISING);
+
+  // Initialize our timer(s) to read each sensor every
+  // specified amount of time (ms).
+  read_timer.AddTimer(500, ReadAmbientTempSensor);
+  // Delay is no longer necessary as PrintCoolantFlowRate is called
+  // every 500 ms.
+  read_timer.AddTimer(500, ReadCoolantFlowRate);
 }
 
 void loop()
 {
-  delay(0);
-  // delay(temp_board.delayTime);
+  // can_bus.Tick();
   read_timer.Tick(millis());
-  // PrintCoolantFlowRate();
-
-  // Does not work currently but will work when the CAN
-  // library is fixed.
-  // tx_message.Tick(millis());
 }
