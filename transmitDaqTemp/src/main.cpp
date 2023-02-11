@@ -22,21 +22,21 @@ TempBoard temp_board;
 VirtualTimerGroup read_timer;
 
 // Set up for ambient_temp_signal.
-CANSignal<float, 0, 16, CANTemplateConvertFloat(0.1), CANTemplateConvertFloat(0), false> coolant_flow_signal{};
 CANSignal<float, 32, 16, CANTemplateConvertFloat(0.1), CANTemplateConvertFloat(-40), false> ambient_temp_signal{};
 // Transmit ambient_temp_signal.
-CANTXMessage<2> tx_message_1{can_bus, temp_board.kCANId1, 6, 100, read_timer, coolant_flow_signal, ambient_temp_signal};
+CANTXMessage<1> tx_message_1{can_bus, temp_board.kCANId1, 6, 100, read_timer, ambient_temp_signal};
 
 // Coolant Flow Rate
-// CANSignal<float, 0, 16, CANTemplateConvertFloat(0.1), CANTemplateConvertFloat(0), false> coolant_flow_signal{};
+CANSignal<float, 0, 16, CANTemplateConvertFloat(0.1), CANTemplateConvertFloat(0), false> coolant_flow_signal{};
 // Transmit coolant_flow_signal.
-// CANTXMessage<1> tx_message_2{can_bus, temp_board.kCANId2, 2, 500, read_timer, coolant_flow_signal};
+CANTXMessage<1> tx_message_2{can_bus, temp_board.kCANId2, 2, 500, read_timer, coolant_flow_signal};
 
 // Read coolant flow rate and print value.
 void ReadCoolantFlowRate()
 {
   float coolant_flow_rate = temp_board.ReadCoolantFlowRate();
   Serial.printf("Flow Count: %d\nFlow Rate : %.2f L/hour\n", temp_board.flowCount, coolant_flow_rate);
+  coolant_flow_signal = coolant_flow_rate;
   // Reset flowCount.
   temp_board.flowCount = 0;
 }
@@ -82,6 +82,7 @@ void setup()
 
 void loop()
 {
+  // Fix hardware bug (ESP shutdown pin getting voltage).
   pinMode(GPIO_NUM_15, OUTPUT);
   digitalWrite(GPIO_NUM_15, LOW);
   // can_bus.Tick();
