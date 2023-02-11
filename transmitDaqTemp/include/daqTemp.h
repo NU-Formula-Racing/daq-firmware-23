@@ -14,7 +14,13 @@ public:
     float ReadCoolantFlowRate();
 
     // CAN address.
-    const uint16_t kCANId{0x420};
+    const uint16_t kCANId1{0x420};
+    const uint16_t kCANId2{0x421};
+
+    // enum class kCANID{
+    //     PTrain = 0x420,
+    //     Coolant = 0x421
+    // };
 
     /// Pins
     static constexpr int temp_pin = A0;

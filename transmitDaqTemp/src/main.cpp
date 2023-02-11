@@ -22,9 +22,15 @@ TempBoard temp_board;
 VirtualTimerGroup read_timer;
 
 // Set up for ambient_temp_signal.
+CANSignal<float, 0, 16, CANTemplateConvertFloat(0.1), CANTemplateConvertFloat(0), false> coolant_flow_signal{};
 CANSignal<float, 32, 16, CANTemplateConvertFloat(0.1), CANTemplateConvertFloat(-40), false> ambient_temp_signal{};
-// Transmit motor_temp_signal and coolant_temp_signal.
-CANTXMessage<1> tx_message{can_bus, temp_board.kCANId, 6, 100, read_timer, ambient_temp_signal};
+// Transmit ambient_temp_signal.
+CANTXMessage<2> tx_message_1{can_bus, temp_board.kCANId1, 6, 100, read_timer, coolant_flow_signal, ambient_temp_signal};
+
+// Coolant Flow Rate
+// CANSignal<float, 0, 16, CANTemplateConvertFloat(0.1), CANTemplateConvertFloat(0), false> coolant_flow_signal{};
+// Transmit coolant_flow_signal.
+// CANTXMessage<1> tx_message_2{can_bus, temp_board.kCANId2, 2, 500, read_timer, coolant_flow_signal};
 
 // Read coolant flow rate and print value.
 void ReadCoolantFlowRate()
@@ -68,7 +74,7 @@ void setup()
 
   // Initialize our timer(s) to read each sensor every
   // specified amount of time (ms).
-  read_timer.AddTimer(500, ReadAmbientTempSensor);
+  read_timer.AddTimer(100, ReadAmbientTempSensor);
   // Delay is no longer necessary as PrintCoolantFlowRate is called
   // every 500 ms.
   read_timer.AddTimer(500, ReadCoolantFlowRate);
@@ -76,6 +82,8 @@ void setup()
 
 void loop()
 {
+  pinMode(GPIO_NUM_15, OUTPUT);
+  digitalWrite(GPIO_NUM_15, LOW);
   // can_bus.Tick();
   read_timer.Tick(millis());
 }
