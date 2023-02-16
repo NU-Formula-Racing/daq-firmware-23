@@ -27,7 +27,7 @@ CANSignal<float, 32, 16, CANTemplateConvertFloat(0.1), CANTemplateConvertFloat(-
 CANTXMessage<1> tx_message_1{can_bus, temp_board.kCANId1, 6, 100, read_timer, ambient_temp_signal};
 
 // Coolant Flow Rate
-CANSignal<float, 0, 16, CANTemplateConvertFloat(0.1), CANTemplateConvertFloat(0), false> coolant_flow_signal{};
+CANSignal<float, 0, 16, CANTemplateConvertFloat(0.01), CANTemplateConvertFloat(0), false> coolant_flow_signal{};
 // Transmit coolant_flow_signal.
 CANTXMessage<1> tx_message_2{can_bus, temp_board.kCANId2, 2, 500, read_timer, coolant_flow_signal};
 
@@ -35,8 +35,9 @@ CANTXMessage<1> tx_message_2{can_bus, temp_board.kCANId2, 2, 500, read_timer, co
 void ReadCoolantFlowRate()
 {
   float coolant_flow_rate = temp_board.ReadCoolantFlowRate();
-  Serial.printf("Flow Count: %d\nFlow Rate : %.2f L/hour\n", temp_board.flowCount, coolant_flow_rate);
-  coolant_flow_signal = coolant_flow_rate;
+  Serial.printf("Flow Count: %d\nFlow Rate : %.2f L/min\n", temp_board.flowCount, coolant_flow_rate / 60);
+  // DBC has units in L/min.
+  coolant_flow_signal = coolant_flow_rate / 60;
   // Reset flowCount.
   temp_board.flowCount = 0;
 }
