@@ -35,9 +35,9 @@ CANTXMessage<1> tx_message_2{can_bus, temp_board.kCANId2, 2, 500, read_timer, co
 void ReadCoolantFlowRate()
 {
   float coolant_flow_rate = temp_board.ReadCoolantFlowRate();
-  Serial.printf("Flow Count: %d\nFlow Rate : %.2f L/min\n", temp_board.flowCount, coolant_flow_rate / 60);
+  Serial.printf("Flow Count: %d\nFlow Rate : %.2f L/min\n", temp_board.flowCount, coolant_flow_rate);
   // DBC has units in L/min.
-  coolant_flow_signal = coolant_flow_rate / 60;
+  coolant_flow_signal = coolant_flow_rate;
   // Reset flowCount.
   temp_board.flowCount = 0;
 }
