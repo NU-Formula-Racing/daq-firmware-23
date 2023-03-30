@@ -26,8 +26,6 @@ VirtualTimerGroup read_timer;
 // TX CAN Message
 CANSignal<float, 0, 16, CANTemplateConvertFloat(0.1), CANTemplateConvertFloat(0), false> wheel_speed_signal{};
 CANSignal<float, 16, 16, CANTemplateConvertFloat(0.1), CANTemplateConvertFloat(-40), false> brake_temp_signal{};
-// CANTXMessage<3> tx_message{
-//     can_bus, can_frame_address, 4, std::chrono::milliseconds{100}, wheel_speed_signal, brake_temp_signal};
 CANTXMessage<2> tx_message{
     can_bus, wheel_board.FL_CAN_FRAME_ADDRESS, 4, 100, read_timer, wheel_speed_signal, brake_temp_signal};
 
@@ -35,9 +33,18 @@ void ReadWheelSpeedSensor()
 {
     // Specify if reading the speed of the front or back wheels.
     wheel_speed_signal = wheel_board.ReadWheelSpeedSensor("front");
+    Serial.print("Wheel Speed = ");
+    Serial.print(wheel_speed_signal);
+    Serial.print(" MPH \n");
 }
 
-void ReadBrakeTempSensor() { brake_temp_signal = wheel_board.ReadBrakeTempSensor(); }
+void ReadBrakeTempSensor()
+{
+    brake_temp_signal = wheel_board.ReadBrakeTempSensor();
+    Serial.print("Brake Temp = ");
+    Serial.print(brake_temp_signal);
+    Serial.print(" degrees Celsius\n");
+}
 
 void IRAM_ATTR WheelSpeedISR() { wheel_board.ReadWheelSpeedSensorDuration(); }
 
@@ -45,7 +52,7 @@ void setup()
 {
 #ifdef SERIAL_DEBUG
     // Initialize serial output
-    Serial.begin(115200);
+    Serial.begin(9600);
 #endif
 
     // This only works on ESP32, will crash on compile for Teensy
@@ -57,11 +64,7 @@ void setup()
 
     // Initialize our timer(s)
     read_timer.AddTimer(100, ReadWheelSpeedSensor);
-    read_timer.AddTimer(100, ReadBrakeTempSensor);
+    // read_timer.AddTimer(100, ReadBrakeTempSensor);
 }
 
-void loop()
-{
-    read_timer.Tick(millis());
-    // tx_message.Tick(millis());
-}
+void loop() { read_timer.Tick(millis()); }

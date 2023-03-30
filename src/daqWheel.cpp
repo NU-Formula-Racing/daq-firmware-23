@@ -1,11 +1,8 @@
 #include <Arduino.h>
 #include <daqWheel.h>
 
-// #include <iostream>
-// #include <sstream>
-// #include <stdexcept>
+#include <cmath>
 #include <string>
-// using namespace std;
 
 /**
  * @brief Construct a new Wheel Board:: Wheel Board object
@@ -14,6 +11,10 @@
  */
 WheelBoard::WheelBoard()
 {
+    // Enable interrupts.
+    sei();
+    // Specify both pins as an input.
+    pinMode(wheelSpeedSensorPin, INPUT);
     current_pulse_time = 0;
     previous_pulse_time = 0;
     pulse_duration = 0;
@@ -52,7 +53,7 @@ float WheelBoard::ReadWheelSpeedSensor(const std::string& location)
     else
     {
         // throw std::invalid_argument("Must use \"front\" or \"back\".");
-        Serial.print("Must use \"front\" or \"back\".");
+        Serial.print("Must use \"front\" or \"back\" as input to ReadWheelSpeedSensor().\n");
     }
 
     // Dependent on wheel diameter.
@@ -62,6 +63,11 @@ float WheelBoard::ReadWheelSpeedSensor(const std::string& location)
     // We multiply by 1M because our pulseDuration is measured in uS
     float pulse_frequency = 1000000.0 / (float)pulse_duration;
     float wheel_frequency = pulse_frequency / (float)kMagnetCount;
+    // Display 0 MPH when not moving.
+    if (isinf(wheel_frequency))
+    {
+        wheel_frequency = 0;
+    }
     return wheel_frequency * kWheelCircumference * kMPStoMPH;
 };
 
@@ -76,11 +82,3 @@ float WheelBoard::ReadBrakeTempSensor()
     raw_ADC_value = analogRead(brakeTempSensorPin);
     return (float)raw_ADC_value * brakeTempScalar + brakeTempOffset;
 }
-
-// enum class CANFrameAddress
-// {
-//     FL_CAN_FRAME_ADDRESS = 0x400,
-//     FR_CAN_FRAME_ADDRESS = 0x401,
-//     BL_CAN_FRAME_ADDRESS = 0x402,
-//     BR_CAN_FRAME_ADDRESS = 0x403
-// };

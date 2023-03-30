@@ -7,10 +7,10 @@
 class WheelBoard
 {
 public:
-    static constexpr int wheelSpeedSensorPin = 1;
     WheelBoard();
     void ReadWheelSpeedSensorDuration();
-    float ReadWheelSpeedSensor(const std::string & location);
+    float ReadWheelSpeedSensor(const std::string& location);
+    static constexpr int wheelSpeedSensorPin = 34;
     float ReadBrakeTempSensor();
     enum CANFrameAddress
     {
@@ -21,13 +21,14 @@ public:
     };
 
 private:
-    // pins
-    static constexpr int brakeTempSensorPin = 2;
-    // scalars and offsets
-    static constexpr float brakeTempScalar = 1;
-    static constexpr float brakeTempOffset = 0;
-    // wheel speed sensor
+    // Wheel Speed Sensor //
     unsigned long current_pulse_time;
     unsigned long previous_pulse_time;
     unsigned long pulse_duration;
+    // Brake Temp Sensor //
+    // Pin
+    static constexpr int brakeTempSensorPin = 2;
+    // Scalars and Offsets
+    static constexpr float brakeTempScalar = 1;
+    static constexpr float brakeTempOffset = 0;
 };
