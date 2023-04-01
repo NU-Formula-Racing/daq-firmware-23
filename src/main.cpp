@@ -26,15 +26,15 @@ BrakeBoard brake_board;
 // Transmit over the correct CAN address based on what sensor value is being read.
 // "front" = front press sensor
 // "back" = rear press sensor
-const uint16_t GetCANAddress(std::string sensor)
+const uint16_t GetCANAddress(const std::string &sensor)
 {
   if (sensor == "front")
   {
-    return brake_board.kCANFRONT;
+    return brake_board.FRONT;
   }
   else if (sensor == "back")
   {
-    return brake_board.kCANREAR;
+    return brake_board.REAR;
   }
   else
   {
@@ -74,8 +74,4 @@ void setup()
 void loop()
 {
   read_timer.Tick(millis());
-
-  // Does not work currently but will work when the CAN
-  // library is fixed.
-  // tx_message.Tick(millis());
 }
