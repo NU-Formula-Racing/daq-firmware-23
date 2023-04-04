@@ -40,6 +40,14 @@ float WheelBoard::ReadWheelSpeedSensor(const std::string& location)
 {
     // Wheel Constants
 
+    // Serial.print("current time: ");
+    // Serial.print(micros());
+    // Serial.print("\n");
+
+    Serial.print("difference: ");
+    Serial.print(micros() - previous_pulse_time);
+    Serial.print("\n");
+
     // Diameter of front and back wheels different.
     float diameter = 0;
     if (location == "front")
@@ -52,7 +60,6 @@ float WheelBoard::ReadWheelSpeedSensor(const std::string& location)
     }
     else
     {
-        // throw std::invalid_argument("Must use \"front\" or \"back\".");
         Serial.print("Must use \"front\" or \"back\" as input to ReadWheelSpeedSensor().\n");
     }
 
@@ -63,10 +70,13 @@ float WheelBoard::ReadWheelSpeedSensor(const std::string& location)
     // We multiply by 1M because our pulseDuration is measured in uS
     float pulse_frequency = 1000000.0 / (float)pulse_duration;
     float wheel_frequency = pulse_frequency / (float)kMagnetCount;
-    // Display 0 MPH when not moving.
-    if (isinf(wheel_frequency))
+    // Maximum possible pulse duration for 1 MPH, if the difference between the current time and the previous pulse
+    // time is greater than this value then the wheel has stopped moving.
+    float max_threshold = 1000000.0 / ((1 / (kWheelCircumference * kMPStoMPH)) * (float)kMagnetCount);
+    // Display 0 MPH when not moving or when wheel speed has stopped moving.
+    if (isinf(wheel_frequency) || (micros() - previous_pulse_time) >= max_threshold)
     {
-        wheel_frequency = 0;
+        return 0;
     }
     return wheel_frequency * kWheelCircumference * kMPStoMPH;
 };

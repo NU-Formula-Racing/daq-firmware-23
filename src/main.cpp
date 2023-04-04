@@ -57,13 +57,16 @@ void setup()
 
     // This only works on ESP32, will crash on compile for Teensy
     // This makes us trigger reading wheel speed in an interrupt
+    // Magnets are flipped so we both a rising and falling edge have
+    // to be detected.
     attachInterrupt(wheel_board.wheelSpeedSensorPin, WheelSpeedISR, RISING);
+    attachInterrupt(wheel_board.wheelSpeedSensorPin, WheelSpeedISR, FALLING);
 
     // Initialize can bus
     can_bus.Initialize(ICAN::BaudRate::kBaud1M);
 
     // Initialize our timer(s)
-    read_timer.AddTimer(100, ReadWheelSpeedSensor);
+    read_timer.AddTimer(1000, ReadWheelSpeedSensor);
     // read_timer.AddTimer(100, ReadBrakeTempSensor);
 }
 
