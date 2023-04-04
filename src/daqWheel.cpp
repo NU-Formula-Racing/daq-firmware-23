@@ -40,14 +40,6 @@ float WheelBoard::ReadWheelSpeedSensor(const std::string& location)
 {
     // Wheel Constants
 
-    // Serial.print("current time: ");
-    // Serial.print(micros());
-    // Serial.print("\n");
-
-    Serial.print("difference: ");
-    Serial.print(micros() - previous_pulse_time);
-    Serial.print("\n");
-
     // Diameter of front and back wheels different.
     float diameter = 0;
     if (location == "front")
