@@ -27,7 +27,7 @@ VirtualTimerGroup read_timer;
 CANSignal<float, 0, 16, CANTemplateConvertFloat(0.1), CANTemplateConvertFloat(0), false> wheel_speed_signal{};
 CANSignal<float, 16, 16, CANTemplateConvertFloat(0.1), CANTemplateConvertFloat(-40), false> brake_temp_signal{};
 CANTXMessage<2> tx_message{
-    can_bus, wheel_board.FL_CAN_FRAME_ADDRESS, 4, 10, read_timer, wheel_speed_signal, brake_temp_signal};
+    can_bus, wheel_board.FL_CAN_FRAME_ADDRESS, 4, 100, read_timer, wheel_speed_signal, brake_temp_signal};
 
 void ReadWheelSpeedSensor()
 {
@@ -66,8 +66,8 @@ void setup()
     can_bus.Initialize(ICAN::BaudRate::kBaud1M);
 
     // Initialize our timer(s)
-    read_timer.AddTimer(1000, ReadWheelSpeedSensor);
-    // read_timer.AddTimer(100, ReadBrakeTempSensor);
+    read_timer.AddTimer(100, ReadWheelSpeedSensor);
+    // read_timer.AddTimer(1000, ReadBrakeTempSensor);
 }
 
 void loop() { read_timer.Tick(millis()); }

@@ -27,7 +27,7 @@ private:
     unsigned long pulse_duration;
     // Brake Temp Sensor //
     // Pin
-    static constexpr int brakeTempSensorPin = 2;
+    static constexpr int brakeTempSensorPin = 35;
     // Scalars and Offsets
     static constexpr float brakeTempScalar = 1;
     static constexpr float brakeTempOffset = 0;
