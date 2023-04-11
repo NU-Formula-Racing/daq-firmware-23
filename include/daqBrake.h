@@ -12,19 +12,19 @@ public:
     float ReadBrakePressSensor();
 
     // Front and rear CAN addresses.
-    enum CANFrameAddress
-    {
-        FRONT = 0x410,
-        REAR = 0x411
-    };
-    // const uint16_t kCANFRONT{0x410};
-    // const uint16_t kCANREAR{0x411};
+    // enum CANFrameAddress
+    // {
+    //     FRONT = 0x410,
+    //     REAR = 0x411
+    // };
+    const uint16_t kCANFRONT{0x410};
+    const uint16_t kCANREAR{0x411};
 
 private:
     /// Pins
     // Both front and rear break press sensors
     // have the same pin number.
-    static constexpr int BrakePressSensorPin = 0;
+    static constexpr int BrakePressSensorPin = 36;
 
     /// Scalars & Offsets
 

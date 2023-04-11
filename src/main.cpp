@@ -30,11 +30,11 @@ const uint16_t GetCANAddress(const std::string &sensor)
 {
   if (sensor == "front")
   {
-    return brake_board.FRONT;
+    return brake_board.kCANFRONT;
   }
   else if (sensor == "back")
   {
-    return brake_board.REAR;
+    return brake_board.kCANREAR;
   }
   else
   {
@@ -49,11 +49,15 @@ CANSignal<float, 0, 16, CANTemplateConvertFloat(1), CANTemplateConvertFloat(0), 
 // GetCANAddress should be passed the correct value:
 // "front" = front press sensor
 // "back" = rear press sensor
-CANTXMessage<1> tx_message{can_bus, GetCANAddress("front"), 2, 10, read_timer, brake_press_signal};
+CANTXMessage<1> tx_message{can_bus, GetCANAddress("front"), 1, 100, read_timer, brake_press_signal};
+// CANTXMessage<1> tx_message{can_bus, brake_board.kCANFRONT, 1, 100, read_timer, brake_press_signal};
 
 void ReadBrakePressSensor()
 {
   brake_press_signal = brake_board.ReadBrakePressSensor();
+  Serial.print("Brake Press: ");
+  Serial.print(brake_press_signal);
+  Serial.print("\n");
 }
 
 void setup()
@@ -61,7 +65,7 @@ void setup()
 
 #ifdef SERIAL_DEBUG
   // Initialize serial output
-  Serial.begin(115200);
+  Serial.begin(9600);
 #endif
 
   // Initialize CAN bus.
