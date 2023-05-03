@@ -12,6 +12,7 @@ float ThermistorSensor::Read() const
 {
     // Find the resistance of the thermistor
     int rawADC = analogRead(this->_sensorPin);
+    Serial.printf("Raw Adc: %d\n", rawADC);
     float vout = ((float)rawADC * this->_vcc) / this->_vccRes;
     float rth = (this->_vcc * this->_r2) / vout - this->_r2;
 

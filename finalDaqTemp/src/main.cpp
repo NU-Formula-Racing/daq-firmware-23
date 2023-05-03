@@ -9,7 +9,7 @@
 
 #define SERIAL_DEBUG
 
-const bool DEBUG = false;
+const bool DEBUG = true;
 
 #pragma region CAN Setup
 // Decide which can buss to use based on hardware

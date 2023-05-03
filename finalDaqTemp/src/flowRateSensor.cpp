@@ -27,5 +27,5 @@ float FlowRateSensor::Read() const
 void FlowRateSensor::Print() const
 {
     float flowRate = this->Read();
-    Serial.printf("Flow Rate: %0.2f L/s", flowRate);
+    Serial.printf("Flow Rate: %0.2f L/s\n", flowRate);
 }
