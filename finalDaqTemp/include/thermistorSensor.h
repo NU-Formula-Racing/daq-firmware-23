@@ -21,7 +21,7 @@ class ThermistorSensor
         // Steinhart-hart Coefficients - Default is set to 2023's ambient sensor 
         float _a = 0.0008646457;
         float _b = 0.0002546929;
-        float _b = 0.0000001693933;
+        float _c = 0.0000001693933;
 
         // Electrical Configuration
         float _r2;
@@ -34,7 +34,10 @@ class ThermistorSensor
         // Create a ThermistorSensor object who's input is read at "sensorPin", and uses a resistor of "r2" ohms as the known resistor value
         //
         ThermistorSensor(int sensorPin, float r2):
-        _sensorPin(sensorPin),_r2(r2){};
+        _sensorPin(sensorPin),_r2(r2)
+        {
+            pinMode(sensorPin, INPUT);
+        };
 
         //
         // Reads the value of the temperature sensor, and returns in Celsius
@@ -42,10 +45,13 @@ class ThermistorSensor
         float Read() const;
 
         //
-        // Prints the value of the temperature to the serial montitor
+        // Prints the temperature read to the serial montitor
         //
         void Print() const;
 
+        //
+        // Set voltage settings
+        //
         void SetHardwareConfig(float vcc, float vccRes);
 
         //

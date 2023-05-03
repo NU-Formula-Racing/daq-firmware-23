@@ -14,21 +14,22 @@ class FlowRateSensor
     private:
         int _sensorPin;
 
-
     public:
-
         //
         // Create a FlowRateSensor object who's signal wire is at "sensorPin"
         //
         FlowRateSensor(int sensorPin):
-            _sensorPin(sensorPin){}
+            _sensorPin(sensorPin)
+            {
+                pinMode(sensorPin, INPUT);
+            };
 
         //
-        // Reads the flow rate from the sensor, and returns it in liters/minute
+        // Reads the flow rate from the sensor, and returns it in liters/second
         // Note, this function will halt the execution of the program until a pulse from the sensor is read
         // Normally, this delay is insignificant, but it should be noted.
         //
-        float Read();
+        float Read() const;
 
         //
         // Prints the value of thhe temperature sensor
