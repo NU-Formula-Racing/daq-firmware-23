@@ -43,8 +43,8 @@ CANTXMessage<1> tx_message_2{can_bus, kCANId2, 2, 500, read_timer, coolant_flow_
 
 #pragma region Sensor Setup
 
-int TEMP_SENSOR_PIN = A0;
-int FLOW_SENSOR_PIN = A7;
+int TEMP_SENSOR_PIN = 35;
+int FLOW_SENSOR_PIN = A7; // For the old esp
 float R2 = 10000;
 
 ThermistorSensor tempSensor(TEMP_SENSOR_PIN, R2);
