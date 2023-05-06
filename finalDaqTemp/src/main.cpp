@@ -43,11 +43,13 @@ CANTXMessage<1> tx_message_2{can_bus, kCANId2, 2, 500, read_timer, coolant_flow_
 
 #pragma region Sensor Setup
 
-int TEMP_SENSOR_PIN = 35;
+int AMBIENT_TEMP_PIN = 35;
+int COOLANT_TEMP_PIN = 32;
 int FLOW_SENSOR_PIN = A7; // For the old esp
 float R2 = 10000;
 
-ThermistorSensor tempSensor(TEMP_SENSOR_PIN, R2);
+ThermistorSensor ambientTempSensor(AMBIENT_TEMP_PIN, R2);
+ThermistorSensor coolantTempSensor(COOLANT_TEMP_PIN, R2);
 FlowRateSensor flowSensor(FLOW_SENSOR_PIN);
 
 #pragma endregion
@@ -56,17 +58,36 @@ FlowRateSensor flowSensor(FLOW_SENSOR_PIN);
 // Read coolant flow rate and print value.
 void ReadCoolantFlowRate()
 {
-  float flowRate = flowSensor.Read();
+  // float flowRate = flowSensor.Read();
+  float flowRate = 10;
   coolant_flow_signal = flowRate;
-  if (DEBUG) flowSensor.Print();
+  if (DEBUG)
+  {
+    Serial.println("----- FLOW RATE SENSOR -----");
+    flowSensor.Print();
+  }
 }
 
 // Read ambient temp sensor and print temperature (Celsius).
 void ReadAmbientTempSensor()
 {
-  float temperature = tempSensor.Read();
+  float temperature = ambientTempSensor.Read();
   ambient_temp_signal = temperature;
-  if (DEBUG) tempSensor.Print();
+  if (DEBUG)
+  {
+    Serial.println("----- AMBIENT TEMP SENSOR -----");
+    ambientTempSensor.Print();
+  }
+}
+
+void ReadCoolantTemp()
+{
+  float temperature = coolantTempSensor.Read();
+  if (DEBUG)
+  {
+    Serial.println("----- COOLANT TEMP SENSOR -----");
+    coolantTempSensor.Print();
+  }
 }
 
 void setup()
@@ -76,6 +97,12 @@ void setup()
   // Initialize serial output
   Serial.begin(9600);
   #endif
+
+  // Change Hardware Configuration for Coolant Temp Sensor
+  coolantTempSensor.SetHardwareConfig(3.3, 4095);
+  coolantTempSensor.SetSteinhartHartCoefficents(0.0011351346170947529264324571354073, 
+                                                0.00023199412368471942874629067969408,
+                                                0.000000090776459129764462247531747698604);
 
   // Initialize CAN bus.
   can_bus.Initialize(ICAN::BaudRate::kBaud1M);
@@ -94,4 +121,8 @@ void loop()
   digitalWrite(GPIO_NUM_15, LOW);
   // can_bus.Tick();
   read_timer.Tick(millis());
+
+  // * Debug
+  ReadCoolantTemp();
+  delay(500);
 }

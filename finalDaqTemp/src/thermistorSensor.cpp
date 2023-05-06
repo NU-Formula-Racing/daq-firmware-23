@@ -12,12 +12,14 @@ float ThermistorSensor::Read() const
 {
     // Find the resistance of the thermistor
     int rawADC = analogRead(this->_sensorPin);
-    Serial.printf("Raw Adc: %d\n", rawADC);
+    // Serial.printf("Raw Adc: %d\n", rawADC);
     float vout = ((float)rawADC * this->_vcc) / this->_vccRes;
+    // Serial.printf("Vout: %0.2f\n", vout);
     float rth = (this->_vcc * this->_r2) / vout - this->_r2;
-
+    // Serial.printf("Rth: %0.2f\n", rth);
     // Calculate the temperature
     float temperature = (1 / (this->_a + (this->_b * log(rth) + (this->_c * pow(log(rth), 3)))));
+    // Serial.println(temperature);
     // Convert from K to C
     return temperature - 273.15;
 }
@@ -27,7 +29,7 @@ float ThermistorSensor::Read() const
 //
 void ThermistorSensor::Print() const
 {
-    int temperature = this->Read();
+    float temperature = this->Read();
     Serial.printf("Reading %0.2f \u00B0C\n", temperature);
 }
 
