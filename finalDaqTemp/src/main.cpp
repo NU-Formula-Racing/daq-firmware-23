@@ -9,7 +9,7 @@
 
 #define SERIAL_DEBUG
 
-const bool DEBUG = true;
+const bool PRINT_SENSOR_DATA = true;
 
 #pragma region CAN Setup
 // Decide which can buss to use based on hardware
@@ -61,7 +61,7 @@ void ReadCoolantFlowRate()
   // float flowRate = flowSensor.Read();
   float flowRate = 10;
   coolant_flow_signal = flowRate;
-  if (DEBUG)
+  if (PRINT_SENSOR_DATA)
   {
     Serial.println("----- FLOW RATE SENSOR -----");
     flowSensor.Print();
@@ -73,7 +73,7 @@ void ReadAmbientTempSensor()
 {
   float temperature = ambientTempSensor.Read();
   ambient_temp_signal = temperature;
-  if (DEBUG)
+  if (PRINT_SENSOR_DATA)
   {
     Serial.println("----- AMBIENT TEMP SENSOR -----");
     ambientTempSensor.Print();
@@ -83,7 +83,7 @@ void ReadAmbientTempSensor()
 void ReadCoolantTemp()
 {
   float temperature = coolantTempSensor.Read();
-  if (DEBUG)
+  if (PRINT_SENSOR_DATA)
   {
     Serial.println("----- COOLANT TEMP SENSOR -----");
     coolantTempSensor.Print();

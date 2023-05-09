@@ -53,9 +53,9 @@ void UpdateFlowCount()
 void ReadAmbientTempSensor()
 {
   ambient_temp_signal = temp_board.ReadAmbientTempSensor();
-  Serial.print("Temperature = ");
-  Serial.print(ambient_temp_signal);
-  Serial.print(" degrees Celsius \n");
+  // Serial.print("Temperature = ");
+  // Serial.print(ambient_temp_signal);
+  // Serial.print(" degrees Celsius \n");
 }
 
 void setup()

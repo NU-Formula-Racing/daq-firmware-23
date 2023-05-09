@@ -12,13 +12,14 @@
 //
 float FlowRateSensor::Read() const
 {
-    int X = pulseIn(this->_sensorPin, HIGH);
-    int Y = pulseIn(this->_sensorPin, LOW);
-    int TIME = X + Y;
-    float FREQUENCY = 1000000/TIME;
-    float WATER = FREQUENCY/7.5;
-    float LS = WATER/60;
-    return LS;
+    int x = pulseIn(this->_sensorPin, HIGH);
+    int y = pulseIn(this->_sensorPin, LOW);
+    int time = x + y;
+    if (time == 0) return 0; // Handle timeout
+    float freq = 1000000/time;
+    float water = freq/7.5;
+    float litersPerSec = water/60;
+    return litersPerSec;
 }
 
 //

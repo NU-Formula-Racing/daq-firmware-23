@@ -37,6 +37,6 @@ float TempBoard::ReadAmbientTempSensor()
 float TempBoard::ReadCoolantFlowRate()
 {
     int dtInSec = 2;
-    float flowRate = flowCount * dtInSec / 5.5;
+    float flowRate = flowCount * dtInSec / 7.5;
     return flowRate;
 }
