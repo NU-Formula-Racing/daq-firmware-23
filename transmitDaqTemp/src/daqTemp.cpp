@@ -22,6 +22,7 @@ float TempBoard::ReadAmbientTempSensor()
 {
     uint16_t raw_ADC_value = 0;
     raw_ADC_value = analogRead(temp_pin);
+    // Serial.printf("ADC Value: %d\n", raw_ADC_value);
     float Vout = ((float)raw_ADC_value * VCC) / adc_resolution;
     float Rth = (VCC * R2 / Vout) - R2;
     float temperature = (1 / (A + (B * log(Rth) + (C * pow(log(Rth), 3)))));

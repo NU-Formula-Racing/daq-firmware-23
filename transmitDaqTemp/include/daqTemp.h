@@ -23,8 +23,8 @@ public:
     // };
 
     /// Pins
-    static constexpr int temp_pin = A0;
-    static constexpr int flow_pin = A7;
+    static constexpr int temp_pin = 32;
+    static constexpr int flow_pin = 34;
 
     // Coolant Flow Count Value
     unsigned int flowCount;

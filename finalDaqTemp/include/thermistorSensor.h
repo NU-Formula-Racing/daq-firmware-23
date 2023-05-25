@@ -1,5 +1,6 @@
 /* thermistorSensor.h*/
 
+#include "ISensor.h"
 // * I realize that this abstraction is very overkill, but this is more for the sake that we are working as a team
 // * This, in some circles, is considered best practice; it is best to ensure that our code follows best practices for the sake of following years
 
@@ -15,7 +16,7 @@
 //  - The pin that the connector is set on - this is passed through the resistor, along with the value of the second resistor
 // If the user wishes to deviate from the standard hardware layout in terms of value, reference the SetHardwareConfig() method
 //
-class ThermistorSensor
+class ThermistorSensor : public ISensor
 {
     private:
         // Steinhart-hart Coefficients - Default is set to 2023's ambient sensor 
@@ -42,12 +43,12 @@ class ThermistorSensor
         //
         // Reads the value of the temperature sensor, and returns in Celsius
         //
-        float Read() const;
+        float Read();
 
         //
         // Prints the temperature read to the serial montitor
         //
-        void Print() const;
+        void Print();
 
         //
         // Set voltage settings

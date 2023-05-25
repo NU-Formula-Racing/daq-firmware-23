@@ -53,9 +53,9 @@ void UpdateFlowCount()
 void ReadAmbientTempSensor()
 {
   ambient_temp_signal = temp_board.ReadAmbientTempSensor();
-  // Serial.print("Temperature = ");
-  // Serial.print(ambient_temp_signal);
-  // Serial.print(" degrees Celsius \n");
+  Serial.print("Temperature = ");
+  Serial.print(ambient_temp_signal);
+  Serial.print(" degrees Celsius \n");
 }
 
 void setup()
@@ -88,5 +88,5 @@ void loop()
   digitalWrite(GPIO_NUM_15, LOW);
   // can_bus.Tick();
   read_timer.Tick(millis());
-  
+  delay(500);
 }

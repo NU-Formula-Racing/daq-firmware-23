@@ -4,6 +4,7 @@
 
 #include <Arduino.h>
 #include "virtualTimer.h"
+#include "interruptHandler.h"
 #include "flowRateSensor.h"
 #include "thermistorSensor.h"
 
@@ -54,13 +55,13 @@ FlowRateSensor flowSensor(FLOW_SENSOR_PIN);
 
 #pragma endregion
 
+#pragma region Reading functions
 // * Reading functions -- used for updating signals
 // Read coolant flow rate and print value.
 void ReadCoolantFlowRate()
 {
   // float flowRate = flowSensor.Read();
-  float flowRate = 10;
-  coolant_flow_signal = flowRate;
+  coolant_flow_signal = flowSensor.Read();
   if (PRINT_SENSOR_DATA)
   {
     Serial.println("----- FLOW RATE SENSOR -----");
@@ -90,6 +91,8 @@ void ReadCoolantTemp()
   }
 }
 
+#pragma endregion
+
 void setup()
 {
 
@@ -98,8 +101,10 @@ void setup()
   Serial.begin(9600);
   #endif
 
+  // Attach interrupts
+  AttachInterruptHandler(flowSensor, COOLANT_TEMP_PIN, RISING);
+
   // Change Hardware Configuration for Coolant Temp Sensor
-  coolantTempSensor.SetHardwareConfig(3.3, 4095);
   coolantTempSensor.SetSteinhartHartCoefficents(0.0011351346170947529264324571354073, 
                                                 0.00023199412368471942874629067969408,
                                                 0.000000090776459129764462247531747698604);
@@ -122,7 +127,5 @@ void loop()
   // can_bus.Tick();
   read_timer.Tick(millis());
 
-  // * Debug
-  ReadCoolantTemp();
   delay(500);
 }

@@ -8,7 +8,7 @@
 //
 // Reads the value of the temperature sensor, and returns in Celsius
 //
-float ThermistorSensor::Read() const
+float ThermistorSensor::Read()
 {
     // Find the resistance of the thermistor
     float rawADC = analogRead(this->_sensorPin);
@@ -27,7 +27,7 @@ float ThermistorSensor::Read() const
 //
 // Prints the temperature read to the serial montitor
 //
-void ThermistorSensor::Print() const
+void ThermistorSensor::Print()
 {
     float temperature = this->Read();
     Serial.printf("Reading %0.2f \u00B0C\n", temperature);
