@@ -37,15 +37,8 @@ private:
     static constexpr float adc_resolution = 4095;
 
     // Temp Constants
-    // static constexpr float R2 = 10000;
-    // static constexpr float A = 0.001129148;
-    // static constexpr float B = 0.000234125;
-    // static constexpr float C = 0.0000000846741;
-    const float R2 = 10000;
-    const float A = 0.0008646457;
-    const float B = 0.0002546929;
-    const float C = 0.0000001693933;
-    // const float A = 0.00086464570507481025671920266089667116571417420815226;
-    // const float B = 0.00025469298487325369343931097410154953511601128782288;
-    // const float C = 0.00000016939334252071086626365492600511414247094647827816;
+    static constexpr float R2 = 10000;
+    static constexpr float A = 0.0008646457;
+    static constexpr float B = 0.0002546929;
+    static constexpr float C = 0.0000001693933;
 };

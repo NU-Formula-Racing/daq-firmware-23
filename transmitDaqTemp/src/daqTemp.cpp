@@ -25,8 +25,7 @@ float TempBoard::ReadAmbientTempSensor()
     float Vout = ((float)raw_ADC_value * VCC) / adc_resolution;
     float Rth = (VCC * R2 / Vout) - R2;
     float temperature = (1 / (A + (B * log(Rth) + (C * pow(log(Rth), 3)))));
-    temperature = temperature - 273.15;
-    return temperature;
+    return temperature - 273.15;
 }
 
 /**
