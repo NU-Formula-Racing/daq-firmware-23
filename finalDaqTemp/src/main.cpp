@@ -4,7 +4,6 @@
 
 #include <Arduino.h>
 #include "virtualTimer.h"
-#include "interruptHandler.h"
 #include "flowRateSensor.h"
 #include "thermistorSensor.h"
 
@@ -93,6 +92,12 @@ void ReadCoolantTemp()
 
 #pragma endregion
 
+// Ugly workaround
+void UpdateFlowRate()
+{
+  flowSensor.HandleInterrupt();
+}
+
 void setup()
 {
 
@@ -102,7 +107,7 @@ void setup()
   #endif
 
   // Attach interrupts
-  AttachInterruptHandler(flowSensor, COOLANT_TEMP_PIN, RISING);
+  attachInterrupt(COOLANT_TEMP_PIN, UpdateFlowRate, RISING);
 
   // Change Hardware Configuration for Coolant Temp Sensor
   coolantTempSensor.SetSteinhartHartCoefficents(0.0011351346170947529264324571354073, 

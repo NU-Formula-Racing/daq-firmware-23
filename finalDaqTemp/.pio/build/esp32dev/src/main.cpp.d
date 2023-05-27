@@ -128,8 +128,8 @@
  C:/Users/esamp/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/spi_flash/include/esp_spi_flash_counters.h \
  C:/Users/esamp/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_hw_support/include/soc/esp32/spiram.h \
  .pio/libdeps/esp32dev/timers/include/virtualTimer.h \
- include/interruptHandler.h include/ISensor.h include/flowRateSensor.h \
- include/thermistorSensor.h .pio/libdeps/esp32dev/CAN/include/esp_can.h \
+ include/flowRateSensor.h include/ISensor.h include/thermistorSensor.h \
+ .pio/libdeps/esp32dev/CAN/include/esp_can.h \
  .pio/libdeps/esp32dev/CAN/src/ESP32CAN/ESP32CAN.h \
  .pio/libdeps/esp32dev/CAN/src/ESP32CAN/CAN_config.h \
  .pio/libdeps/esp32dev/CAN/src/ESP32CAN/CAN.h \

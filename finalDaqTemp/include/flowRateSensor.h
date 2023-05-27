@@ -2,7 +2,6 @@
 
 #include <Arduino.h>
 #include "ISensor.h"
-#include "interruptHandler.h"
 
 // * I realize that this abstraction is very overkill, but this is more for the sake that we are working as a team
 // * This, in some circles, is considered best practice; it is best to ensure that our code follows best practices for the sake of following years
@@ -11,7 +10,7 @@
 // The FlowRateSensor is an abstraction of a Hall Effect based Flow Rate Sensor. For details, see: https://how2electronics.com/arduino-water-flow-sensor-measure-flow-rate-volume/
 // The user should must know the pin of the sensor's signal wire, which is passed through the constructor
 //
-class FlowRateSensor : public ISensor, public IInterruptHandler
+class FlowRateSensor : public ISensor
 {
     private:
         int _sensorPin;
