@@ -88,8 +88,5 @@ void loop()
   digitalWrite(GPIO_NUM_15, LOW);
   // can_bus.Tick();
   read_timer.Tick(millis());
-<<<<<<< HEAD
   delay(500);
-=======
->>>>>>> 1053b043ccc5f0abac72deaa41278511a62a5d47
 }

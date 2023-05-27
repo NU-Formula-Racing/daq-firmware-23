@@ -28,7 +28,10 @@ float FlowRateSensor::Read()
     */
 
    unsigned long readTime = millis();
-   long dtInSec = (readTime - this->_lastReadTime) / 1000;
+   // Serial.printf("reading flow rate sensor at %d millis\n", readTime);
+   float dtInSec = (readTime - this->_lastReadTime) / (float)1000;
+   Serial.printf("flow count: %d\n", this->_flowCount);
+   Serial.printf("dtInSec: %f\n ", dtInSec);
    float flowRate = this->_flowCount * dtInSec / 7.5;
    this->_flowCount = 0;
    this->_lastReadTime = readTime;

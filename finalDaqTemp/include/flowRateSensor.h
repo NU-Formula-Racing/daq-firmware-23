@@ -14,7 +14,7 @@ class FlowRateSensor : public ISensor
 {
     private:
         int _sensorPin;
-        int _flowCount;
+        volatile int _flowCount;
         unsigned long _lastReadTime;
 
     public:

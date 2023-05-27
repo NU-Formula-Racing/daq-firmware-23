@@ -45,7 +45,7 @@ CANTXMessage<1> tx_message_2{can_bus, kCANId2, 2, 500, read_timer, coolant_flow_
 
 int AMBIENT_TEMP_PIN = 35;
 int COOLANT_TEMP_PIN = 32;
-int FLOW_SENSOR_PIN = A7; // For the old esp
+int FLOW_SENSOR_PIN = 34; // For the old esp
 float R2 = 10000;
 
 ThermistorSensor ambientTempSensor(AMBIENT_TEMP_PIN, R2);
@@ -95,6 +95,7 @@ void ReadCoolantTemp()
 // Ugly workaround
 void UpdateFlowRate()
 {
+  Serial.printf"Updating flow rate \n");
   flowSensor.HandleInterrupt();
 }
 
@@ -107,7 +108,7 @@ void setup()
   #endif
 
   // Attach interrupts
-  attachInterrupt(COOLANT_TEMP_PIN, UpdateFlowRate, RISING);
+  attachInterrupt(FLOW_SENSOR_PIN, UpdateFlowRate, RISING);
 
   // Change Hardware Configuration for Coolant Temp Sensor
   coolantTempSensor.SetSteinhartHartCoefficents(0.0011351346170947529264324571354073, 
