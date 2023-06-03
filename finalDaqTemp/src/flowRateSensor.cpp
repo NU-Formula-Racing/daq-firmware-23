@@ -10,32 +10,31 @@ void FlowRateSensor::HandleInterrupt()
     this->_flowCount++;
 }
 //
-// Reads the flow rate from the sensor, and returns it in liters/second
-// Note, this function will halt the execution of the program until a pulse from the sensor is read
-// Normally, this delay is insignificant, but it should be noted.
+// Reads the flow rate from the sensor, and returns it in liters/minute
 //
 float FlowRateSensor::Read()
 {
-    /*
-    int x = pulseIn(this->_sensorPin, HIGH);
-    int y = pulseIn(this->_sensorPin, LOW);
-    int time = x + y;
-    if (time == 0) return 0; // Handle timeout
-    float freq = 1000000/time;
-    float water = freq/7.5;
-    float litersPerSec = water/60;
-    return litersPerSec;
-    */
+    // Calculate dt
+    unsigned long readTime = millis();
+    // Serial.printf("reading flow rate sensor at %d millis\n", readTime);
+    float dtInSec = (float)(readTime - this->_lastReadTime) / 1000;
+    this->_lastReadTime = readTime;
 
-   unsigned long readTime = millis();
-   // Serial.printf("reading flow rate sensor at %d millis\n", readTime);
-   float dtInSec = (readTime - this->_lastReadTime) / (float)1000;
-   Serial.printf("flow count: %d\n", this->_flowCount);
-   Serial.printf("dtInSec: %f\n ", dtInSec);
-   float flowRate = this->_flowCount * dtInSec / 7.5;
-   this->_flowCount = 0;
-   this->_lastReadTime = readTime;
-   return flowRate;
+    // Edge case
+    if (dtInSec < 10e-5)
+        return this->_lastRead;
+
+    // Serial.printf("flow count: %d\n", this->_flowCount);
+    // Serial.printf("dtInSec: %f\n ", dtInSec);
+
+    // Calculate flow rate
+    float flowRate = this->_flowCount / (dtInSec * 5.5);
+
+    // Reset state
+    this->_lastRead = flowRate;
+    this->_flowCount = 0;
+
+    return flowRate;
 }
 
 //
@@ -43,6 +42,6 @@ float FlowRateSensor::Read()
 //
 void FlowRateSensor::Print()
 {
-    float flowRate = this->Read();
-    Serial.printf("Flow Rate: %0.2f L/s\n", flowRate);
+    float flowRate = this->_lastRead;
+    Serial.printf("Flow Rate: %0.2f L/min\n", flowRate);
 }

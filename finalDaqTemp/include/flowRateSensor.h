@@ -12,30 +12,30 @@
 //
 class FlowRateSensor : public ISensor
 {
-    private:
-        int _sensorPin;
-        volatile int _flowCount;
-        unsigned long _lastReadTime;
+private:
+    int _sensorPin;
+    int _flowCount;
+    unsigned long _lastReadTime;
+    float _lastRead;
 
-    public:
-        //
-        // Create a FlowRateSensor object who's signal wire is at "sensorPin"
-        //
-        FlowRateSensor(int sensorPin):
-            _sensorPin(sensorPin), _flowCount(0), _lastReadTime(0)
-        {
-            pinMode(sensorPin, INPUT);
-        };
+public:
+    //
+    // Create a FlowRateSensor object who's signal wire is at "sensorPin"
+    //
+    FlowRateSensor(int sensorPin) : _sensorPin(sensorPin), _flowCount(0), _lastReadTime(0), _lastRead(0)
+    {
+        pinMode(sensorPin, INPUT);
+    };
 
-        void HandleInterrupt();
-        
-        //
-        // Reads the flow rate from the sensor, and returns it in liters/second
-        //
-        float Read();
+    void HandleInterrupt();
 
-        //
-        // Prints the value of the flow rate sensor
-        //
-        void Print();
+    //
+    // Reads the flow rate from the sensor, and returns it in liters/second
+    //
+    float Read();
+
+    //
+    // Prints the value of the flow rate sensor
+    //
+    void Print();
 };
