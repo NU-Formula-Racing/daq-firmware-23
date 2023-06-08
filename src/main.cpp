@@ -199,6 +199,8 @@ void sensorLog()
   Serial.print(log_count);
   Serial.print(" times \n");
   DateTime now = rtc.now();
+  // Update the rtc_signal to send through CAN.
+  rtc_signal = now;
   String placeholder = "";
   rtc_signal = now.unixtime();
 
