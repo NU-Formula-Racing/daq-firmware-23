@@ -152,7 +152,7 @@ CANRXMessage<1> rx_message_throttle{can_bus, kThrottle_CAN, cur_throttle_signal}
 const int rtc_CAN = 0x440;
 
 // Send RTC Data
-CANSignal<float, 0, 32, CANTemplateConvertFloat(1), CANTemplateConvertFloat(0), false> rtc_signal{};
+CANSignal<uint32_t, 0, 32, CANTemplateConvertFloat(1), CANTemplateConvertFloat(0), false> rtc_signal{};
 // Transmit RTC Data.
 CANTXMessage<1> tx_message{can_bus, rtc_CAN, 4, 10, timer_group, rtc_signal};
 
@@ -199,11 +199,13 @@ void sensorLog()
   Serial.print(log_count);
   Serial.print(" times \n");
   DateTime now = rtc.now();
-  // Update the rtc_signal to send through CAN.
-  rtc_signal = now;
   String placeholder = "";
+  // Send RTC signal through CAN.
   rtc_signal = now.unixtime();
 
+  Serial.print("rtc_signal: ");
+  Serial.print(rtc_signal);
+  Serial.print("\n");
 #if isLP
 
   // 100 ms
