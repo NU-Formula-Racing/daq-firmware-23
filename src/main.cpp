@@ -13,12 +13,20 @@
 
 RTC_PCF8523 rtc;
 VirtualTimerGroup timer_group;
+enum SDState
+{
+  OPENED = 0,
+  CLOSED = 1
+};
+SDState current_state = SDState::CLOSED;
+SDState previous_state = SDState::CLOSED;
 
 // Initialize canbus based on teensy board
 #if defined(ARDUINO_TEENSY40) || defined(ARDUINO_TEENSY41)
 #include "teensy_can.h"
 // The bus number is a template argument for Teensy: TeensyCAN<bus_num>
-TeensyCAN<1> can_bus{};
+TeensyCAN<1>
+    can_bus{};
 #endif
 
 #ifdef ARDUINO_ARCH_ESP32
@@ -195,61 +203,64 @@ void saveData()
  */
 void sensorLog()
 {
-  Serial.print("SensorLog() called ");
-  Serial.print(log_count);
-  Serial.print(" times \n");
-  DateTime now = rtc.now();
-  String placeholder = "";
-  // Send RTC signal through CAN.
-  rtc_signal = now.unixtime();
+  if (current_state == SDState::OPENED)
+  {
+    // Serial.print("SensorLog() called ");
+    // Serial.print(log_count);
+    // Serial.print(" times \n");
+    DateTime now = rtc.now();
+    String placeholder = "";
+    // Send RTC signal through CAN.
+    rtc_signal = now.unixtime();
 
-  Serial.print("rtc_signal: ");
-  Serial.print(rtc_signal);
-  Serial.print("\n");
+    // Serial.print("rtc_signal: ");
+    // Serial.print(rtc_signal);
+    // Serial.print("\n");
 #if isLP
 
-  // 100 ms
-  if (log_count % 10 == 0)
-  {
-    //                          Timestamp                     FL Speed                              FR Speed                             BL Speed                                BR Speed
-    dataString = placeholder + now.timestamp() + ", " + float(FL_wheel_speed_signal) + ", " + float(FR_wheel_speed_signal) + ", " + float(BL_wheel_speed_signal) + ", " + float(BR_wheel_speed_signal) + ","
-                 //         FL Brake Temp                       FR Brake Temp                       BL Brake Temp                      BR Brake Temp
-                 + float(FL_brake_temp_signal) + "," + float(FR_brake_temp_signal) + "," + float(BL_brake_temp_signal) + "," + float(BR_brake_temp_signal) + ","
-                 //      F Brake Pressure                B Brake Pressure                Accel_x             Accel_y                 Accel_z
-                 + float(F_Brake_pressure) + "," + float(R_Brake_pressure) + "," + float(accel_x) + ", " + float(accel_y) + ", " + float(accel_z) + ", "
-                 //      Gyro_x                 Gyro_y                 Gyro_z                Long,                    Lat               Timeframe
-                 + float(gyro_x) + ", " + float(gyro_y) + ", " + float(gyro_z) + "," + float(lon_signal) + "," + float(lat_signal) + ", 100ms";
-  }
-  // 10 ms
-  else
-  {
-    //                       Timestamp                     FL Speed                              FR Speed                             BL Speed                                BR Speed
-    dataString = placeholder + now.timestamp() + ", " + float(FL_wheel_speed_signal) + ", " + float(FR_wheel_speed_signal) + ", " + float(BL_wheel_speed_signal) + ", " + float(BR_wheel_speed_signal) + ","
-                 //         FL Brake Temp                       FR Brake Temp                       BL Brake Temp                      BR Brake Temp
-                 + float(FL_brake_temp_signal) + "," + float(FR_brake_temp_signal) + "," + float(BL_brake_temp_signal) + "," + float(BR_brake_temp_signal) + ","
-                 //      F Brake Pressure                B Brake Pressure                Accel_x             Accel_y                 Accel_z
-                 + float(F_Brake_pressure) + "," + float(R_Brake_pressure) + "," + float(accel_x) + ", " + float(accel_y) + ", " + float(accel_z) + ", "
-                 //      Gyro_x                 Gyro_y                 Gyro_z      Long, Lat  Timeframe
-                 + float(gyro_x) + ", " + float(gyro_y) + ", " + float(gyro_z) + ", , " + ", 10ms";
-  }
+    // 100 ms
+    if (log_count % 10 == 0)
+    {
+      //                          Timestamp                     FL Speed                              FR Speed                             BL Speed                                BR Speed
+      dataString = placeholder + now.timestamp() + ", " + float(FL_wheel_speed_signal) + ", " + float(FR_wheel_speed_signal) + ", " + float(BL_wheel_speed_signal) + ", " + float(BR_wheel_speed_signal) + ","
+                   //         FL Brake Temp                       FR Brake Temp                       BL Brake Temp                      BR Brake Temp
+                   + float(FL_brake_temp_signal) + "," + float(FR_brake_temp_signal) + "," + float(BL_brake_temp_signal) + "," + float(BR_brake_temp_signal) + ","
+                   //      F Brake Pressure                B Brake Pressure                Accel_x             Accel_y                 Accel_z
+                   + float(F_Brake_pressure) + "," + float(R_Brake_pressure) + "," + float(accel_x) + ", " + float(accel_y) + ", " + float(accel_z) + ", "
+                   //      Gyro_x                 Gyro_y                 Gyro_z                Long,                    Lat               Timeframe
+                   + float(gyro_x) + ", " + float(gyro_y) + ", " + float(gyro_z) + "," + float(lon_signal) + "," + float(lat_signal) + ", 100ms";
+    }
+    // 10 ms
+    else
+    {
+      //                       Timestamp                     FL Speed                              FR Speed                             BL Speed                                BR Speed
+      dataString = placeholder + now.timestamp() + ", " + float(FL_wheel_speed_signal) + ", " + float(FR_wheel_speed_signal) + ", " + float(BL_wheel_speed_signal) + ", " + float(BR_wheel_speed_signal) + ","
+                   //         FL Brake Temp                       FR Brake Temp                       BL Brake Temp                      BR Brake Temp
+                   + float(FL_brake_temp_signal) + "," + float(FR_brake_temp_signal) + "," + float(BL_brake_temp_signal) + "," + float(BR_brake_temp_signal) + ","
+                   //      F Brake Pressure                B Brake Pressure                Accel_x             Accel_y                 Accel_z
+                   + float(F_Brake_pressure) + "," + float(R_Brake_pressure) + "," + float(accel_x) + ", " + float(accel_y) + ", " + float(accel_z) + ", "
+                   //      Gyro_x                 Gyro_y                 Gyro_z      Long, Lat  Timeframe
+                   + float(gyro_x) + ", " + float(gyro_y) + ", " + float(gyro_z) + ", , " + ", 10ms";
+    }
 
 #else
-  // 1000 ms
-  if (write_count_10ms % 100 == 0)
-  {
-    //                            Timestamp                   RPM                          Inverter Temp                              Motor Temp                          Coolant Temp                         Ambient Temp                        Throttle
-    dataString = placeholder + now.timestamp() + ", " + inverter.GetRPM() + ", " + inverter.GetInverterTemperature() + ", " + inverter.GetMotorTemperature() + "," + float(coolant_temp_signal) + "," + float(ambient_temp_signal) + ", " + float(cur_throttle_signal);
-  }
-  // 10 ms & 100 ms
-  else
-  {
-    //                            Timestamp                   RPM                          Inverter Temp                              Motor Temp       Coolant, Ambient Temp       Throttle
-    dataString = placeholder + now.timestamp() + ", " + inverter.GetRPM() + ", " + inverter.GetInverterTemperature() + ", " + inverter.GetMotorTemperature() + ", , , " + float(cur_throttle_signal);
-  }
+    // 1000 ms
+    if (write_count_10ms % 100 == 0)
+    {
+      //                            Timestamp                   RPM                          Inverter Temp                              Motor Temp                          Coolant Temp                         Ambient Temp                        Throttle
+      dataString = placeholder + now.timestamp() + ", " + inverter.GetRPM() + ", " + inverter.GetInverterTemperature() + ", " + inverter.GetMotorTemperature() + "," + float(coolant_temp_signal) + "," + float(ambient_temp_signal) + ", " + float(cur_throttle_signal);
+    }
+    // 10 ms & 100 ms
+    else
+    {
+      //                            Timestamp                   RPM                          Inverter Temp                              Motor Temp       Coolant, Ambient Temp       Throttle
+      dataString = placeholder + now.timestamp() + ", " + inverter.GetRPM() + ", " + inverter.GetInverterTemperature() + ", " + inverter.GetMotorTemperature() + ", , , " + float(cur_throttle_signal);
+    }
 #endif
 
-  saveData();
-  log_count += 1;
+    saveData();
+    log_count += 1;
+  }
 }
 
 // void sensor100ms()
@@ -358,7 +369,10 @@ DateTime init_RTC()
  */
 void init_SD(DateTime now)
 {
-  if (!SD.begin(CSpin))
+  SPI.begin(18, 19, 23, CSpin);
+  SPI.setDataMode(SPI_MODE0);
+  pinMode(CSpin, OUTPUT);
+  if (!SD.begin(CSpin, SPI))
   {
     Serial.print("Card failed/not found. \n");
   }
@@ -367,6 +381,7 @@ void init_SD(DateTime now)
     Serial.print("init_SD Initialization Starting... \n");
     sprintf(fileName, "/date=%hhu-%hhu-%hu--time=%hhu-%hhu.csv", now.month(), now.day(), now.year(), now.hour(), now.minute());
     // Create file and close it.
+    Serial.println(fileName);
     sensorData = SD.open(fileName, FILE_WRITE);
     sensorData.close();
 #if isLP
@@ -376,6 +391,41 @@ void init_SD(DateTime now)
 #endif
     saveData();
     Serial.print("init_SD Initialization Finished \n");
+  }
+}
+
+void eject_SD()
+{
+  Serial.print("Ejecting SD... \n");
+  SD.end();
+  Serial.print("SD ejected... \n");
+}
+
+void changeSDState()
+{
+  if (current_state == SDState::OPENED)
+  {
+    current_state = SDState::CLOSED;
+    previous_state = SDState::OPENED;
+  }
+  else
+  {
+    current_state = SDState::OPENED;
+    previous_state = SDState::CLOSED;
+  }
+}
+
+void updateToSDState()
+{
+  if (previous_state == SDState::CLOSED && current_state == SDState::OPENED)
+  {
+    init_SD(rtc.now());
+    previous_state = current_state;
+  }
+  else if (previous_state == SDState::OPENED && current_state == SDState::CLOSED)
+  {
+    eject_SD();
+    previous_state = current_state;
   }
 }
 
@@ -431,9 +481,15 @@ void setup(void)
   DateTime now = init_RTC();
   Serial.print("RTC Initialized \n");
 
-  Serial.print("Initializing SD card... \n");
-  init_SD(now);
-  Serial.print("SD Card Initialization Finished \n");
+  // Serial.print("Initializing SD card... \n");
+  // init_SD(now);
+  // Serial.print("SD Card Initialization Finished \n");
+
+  attachInterrupt(0, changeSDState, FALLING);
+  SD.end();
+  timer_group.AddTimer(1000, []()
+                       { Serial.printf("current state: %d \n", current_state); });
+  timer_group.AddTimer(100, updateToSDState);
 
   Serial.print("Initializing Timers... \n");
   timer_group.AddTimer(10, sensorLog);

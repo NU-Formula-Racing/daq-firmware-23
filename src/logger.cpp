@@ -91,7 +91,11 @@ DateTime LoggerBoard::init_RTC()
 
 void LoggerBoard::init_SD(DateTime now)
 {
-  if (!SD.begin(CSpin))
+  SPIClass spi(VSPI);
+  spi.begin(18, 19, 23, CSpin);
+  spi.setDataMode(SPI_MODE0);
+  pinMode(CSpin, OUTPUT);
+  if (!SD.begin(CSpin, spi))
   {
     Serial.println("Card failed/not found.");
   }
