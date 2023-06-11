@@ -18,8 +18,10 @@ enum SDState
   OPENED = 0,
   CLOSED = 1
 };
-SDState current_state = SDState::CLOSED;
+SDState current_state = SDState::OPENED;
 SDState previous_state = SDState::CLOSED;
+bool sd_started = false;
+float test_num = 1;
 
 // Initialize canbus based on teensy board
 #if defined(ARDUINO_TEENSY40) || defined(ARDUINO_TEENSY41)
@@ -278,7 +280,7 @@ void sensorLog()
 
 #else
     // 100 ms
-    if (log_count % 100 == 0)
+    if (log_count % 10 == 0)
     {
       // dataString = placeholder + now.timestamp() + ", " + inverter.GetRPM() + ", " + inverter.GetInverterTemperature() + ", " + inverter.GetMotorTemperature() + "," + float(coolant_temp_signal) + "," + float(ambient_temp_signal) + ", " + float(cur_throttle_signal);
       dataString = placeholder + now.timestamp() + ", " + + float(accel_percentage_signal) + ", " + float(brake_percentage_signal) + "," + float(torque_limit_percentage_signal) + ","
@@ -295,7 +297,7 @@ void sensorLog()
       + float(max_discharge_current_signal) + "," + float(max_regen_current_signal) + "," + float(battery_voltage_signal) + "," + float(battery_temperature_signal) + "," + float(battery_current_signal) + "," 
       +  " , , , , , , , , " 
       +  " , , , , , , " 
-      + "100ms"; 
+      + "10ms"; 
     }
 #endif
 
@@ -364,9 +366,12 @@ void init_SD(DateTime now)
   if (!SD.begin(CSpin, SPI))
   {
     Serial.print("Card failed/not found. \n");
+    sd_started = false;
   }
   else
   {
+    sd_started = true;
+    test_num++;
     Serial.print("init_SD Initialization Starting... \n");
     String priority;
 #if isLP
@@ -374,7 +379,7 @@ void init_SD(DateTime now)
 #else
     priority = "HP";
 #endif
-    sprintf(fileName, "/%s-date=%hhu-%hhu-%hu-time=%hhu-%hhu-%hhu.csv", priority, now.month(), now.day(), now.year(), now.hour(), now.minute(), now.second());
+    sprintf(fileName, "/%s-date=%hhu-%hhu-%hu-time=%hhu-%u-%hhu.csv", priority, now.month(), now.day(), now.year(), now.hour(), now.minute(), now.second());
     // Create file and close it.
     Serial.println(fileName);
     sensorData = SD.open(fileName, FILE_WRITE);
@@ -491,13 +496,29 @@ void setup(void)
   DateTime now = init_RTC();
   Serial.print("RTC Initialized \n");
 
-  attachInterrupt(0, changeSDState, FALLING);
-  SD.end();
-  timer_group.AddTimer(1000, []()
-                       { Serial.printf("current state: %d \n", current_state); });
-  timer_group.AddTimer(100, detectSDState);
+ 
+  // attachInterrupt(0, changeSDState, FALLING);
+  // SD.end();
+  // timer_group.AddTimer(1000, []()
+  //                      { Serial.printf("current state: %d \n", current_state); });
+  // timer_group.AddTimer(100, detectSDState);
+
+  // SD.end();
+  // delay(200);
+  timer_group.AddTimer(10, [now](){
+    if(!sd_started){
+      SD.end();
+      Serial.print("Initializing RTC... \n");
+      DateTime now = init_RTC();
+      Serial.print("RTC Initialized \n");
+      init_SD(now);
+    }
+  });
+  
+  attachInterrupt(0, [](){SD.end();}, FALLING);
 
   Serial.print("Initializing Timers... \n");
+  
   timer_group.AddTimer(10, sensorLog);
   Serial.print("Timers Initialized \n");
 }
