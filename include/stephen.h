@@ -17,8 +17,6 @@ public:
     void init_SD(DateTime now);
 
     void sensor10ms();
-    void sensor100ms();
-    void sensor1000ms();
 
 private:
     String hp_lp;
