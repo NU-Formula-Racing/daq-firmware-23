@@ -2,7 +2,7 @@
 #include <daqBrakePress.h>
 
 /**
- * @brief Construct a new Brake Board:: Brake Board object.
+ * @brief Construct a new BrakePressBoard object.
  * 
  */
 BrakePressBoard::BrakePressBoard(){};
