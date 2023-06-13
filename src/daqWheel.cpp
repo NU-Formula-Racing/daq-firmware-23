@@ -1,15 +1,13 @@
 #include <Arduino.h>
 #include <daqWheel.h>
-
 #include <cmath>
 #include <string>
 
 /**
  * @brief Construct a new Wheel Board:: Wheel Board object
  *
- * @param can_frame
  */
-WheelBoard::WheelBoard()
+WheelSpeedBoard::WheelSpeedBoard()
 {
     // Enable interrupts.
     sei();
@@ -24,7 +22,7 @@ WheelBoard::WheelBoard()
  * @brief Runs on interrupt to record pulse duration
  *
  */
-void WheelBoard::ReadWheelSpeedSensorDuration()
+void WheelSpeedBoard::ReadWheelSpeedSensorDuration()
 {
     current_pulse_time = micros();
     pulse_duration = current_pulse_time - previous_pulse_time;
@@ -36,23 +34,19 @@ void WheelBoard::ReadWheelSpeedSensorDuration()
  *
  * @return float
  */
-float WheelBoard::ReadWheelSpeedSensor(const std::string& location)
+float WheelSpeedBoard::ReadWheelSpeedSensor(bool frontLocation)
 {
-    // Wheel Constants
 
-    // Diameter of front and back wheels different.
+    // Store wheel diameter.
     float diameter = 0;
-    if (location == "front")
+    // Diameter of front and back wheels different.
+    if (frontLocation)
     {
         diameter = 0.88593;
     }
-    else if (location == "back")
-    {
-        diameter = 2.85436;
-    }
     else
     {
-        Serial.print("Must use \"front\" or \"back\" as input to ReadWheelSpeedSensor().\n");
+        diameter = 2.85436;
     }
 
     // Dependent on wheel diameter.
@@ -65,7 +59,7 @@ float WheelBoard::ReadWheelSpeedSensor(const std::string& location)
     // Maximum possible pulse duration for 1 MPH, if the difference between the current time and the previous pulse
     // time is greater than this value then the wheel has stopped moving.
     float max_threshold = 1000000.0 / ((1 / (kWheelCircumference * kMPStoMPH)) * (float)kMagnetCount);
-    // Display 0 MPH when not moving or when wheel speed has stopped moving.
+    // Display 0 MPH when not moving.
     if (isinf(wheel_frequency) || (micros() - previous_pulse_time) >= max_threshold)
     {
         return 0;
@@ -78,7 +72,7 @@ float WheelBoard::ReadWheelSpeedSensor(const std::string& location)
  *
  * @return float
  */
-float WheelBoard::ReadBrakeTempSensor()
+float WheelSpeedBoard::ReadBrakeTempSensor()
 {
     uint16_t raw_ADC_value = 0;
     raw_ADC_value = analogRead(brakeTempSensorPin);

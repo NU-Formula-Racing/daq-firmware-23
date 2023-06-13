@@ -1,5 +1,4 @@
 #include <Arduino.h>
-
 #include "daqWheel.h"
 
 #define SERIAL_DEBUG
@@ -16,37 +15,89 @@ TeensyCAN<1> can_bus{};
 ESPCAN can_bus{};
 #endif
 
+// Choose values based on the sensors' location on the vehicle. 
+// Choose the front or back wheel speed and brake temperature sensors. 
+// true: front 
+// false: back 
+#define isFront (true)
+// Choose the right or left wheel speed and brake temperature sensors for
+// the selected location (front or back).
+// true: right 
+// false: left
+#define isRight (true)
+
 // Initialize board
-// CANFrameAddress can_frame_address = CANFrameAddress::FL_CAN_FRAME_ADDRESS;
-WheelBoard wheel_board;
+WheelSpeedBoard wheel_speed_board;
 
 // Structure for handling timers
 VirtualTimerGroup read_timer;
 
+// CAN frame address for each wheel. 
+enum CANFrameAddress
+{
+    FRONT_LEFT = 0x400,
+    FRONT_RIGHT = 0x401,
+    BACK_LEFT = 0x402,
+    BACK_RIGHT = 0x403
+};
+
+// Front of vehicle.
+#if isFront 
+
+    // Bool passed to ReadWheelSpeedSensor().
+    bool frontLocation = true;
+
+    // Front right of vehicle.
+    #if isRight
+    auto SelectedCANAddress = CANFrameAddress::FRONT_RIGHT;
+    // Front left of vehicle.  
+    #else 
+    auto SelectedCANAddress = CANFrameAddress::FRONT_LEFT;
+    #endif
+
+// Back of vehicle.
+# else
+
+    // Bool passed to ReadWheelSpeedSensor().
+    bool frontLocation = false;
+
+    // Back right of vehicle.
+    #if isRight
+    auto SelectedCANAddress = CANFrameAddress::BACK_RIGHT;
+    // Back left of vehicle.  
+    #else 
+    auto SelectedCANAddress = CANFrameAddress::BACK_LEFT;
+    #endif
+
+#endif
+
 // TX CAN Message
 CANSignal<float, 0, 16, CANTemplateConvertFloat(0.1), CANTemplateConvertFloat(0), false> wheel_speed_signal{};
 CANSignal<float, 16, 16, CANTemplateConvertFloat(0.1), CANTemplateConvertFloat(-40), false> brake_temp_signal{};
-CANTXMessage<2> tx_message{
-    can_bus, wheel_board.FL_CAN_FRAME_ADDRESS, 4, 100, read_timer, wheel_speed_signal, brake_temp_signal};
+CANTXMessage<2> WHEEL_TX_MESSAGE{can_bus, SelectedCANAddress, 4, 10, read_timer, wheel_speed_signal, brake_temp_signal};
 
+
+/**
+ * @brief Read and record wheel speed CAN value depending on location.
+ * 
+ */
 void ReadWheelSpeedSensor()
 {
-    // Specify if reading the speed of the front or back wheels.
-    wheel_speed_signal = wheel_board.ReadWheelSpeedSensor("front");
-    Serial.print("Wheel Speed = ");
-    Serial.print(wheel_speed_signal);
-    Serial.print(" MPH \n");
+    wheel_speed_signal = wheel_speed_board.ReadWheelSpeedSensor(frontLocation);
+    Serial.printf("Wheel Speed = %0.2f MPH\n", wheel_speed_signal);
 }
 
+/**
+ * @brief Read and record brake temperature CAN value depending on location.
+ * 
+ */
 void ReadBrakeTempSensor()
 {
-    brake_temp_signal = wheel_board.ReadBrakeTempSensor();
-    Serial.print("Brake Temp = ");
-    Serial.print(brake_temp_signal);
-    Serial.print(" degrees Celsius\n");
+    brake_temp_signal = wheel_speed_board.ReadBrakeTempSensor();
+    Serial.printf("Brake Temperature = %0.2f Celsius\n", brake_temp_signal);
 }
 
-void IRAM_ATTR WheelSpeedISR() { wheel_board.ReadWheelSpeedSensorDuration(); }
+void IRAM_ATTR WheelSpeedISR() { wheel_speed_board.ReadWheelSpeedSensorDuration(); }
 
 void setup()
 {
@@ -59,15 +110,18 @@ void setup()
     // This makes us trigger reading wheel speed in an interrupt
     // Magnets are flipped so we both a rising and falling edge have
     // to be detected.
-    attachInterrupt(wheel_board.wheelSpeedSensorPin, WheelSpeedISR, RISING);
-    attachInterrupt(wheel_board.wheelSpeedSensorPin, WheelSpeedISR, FALLING);
+    attachInterrupt(wheel_speed_board.wheelSpeedSensorPin, WheelSpeedISR, RISING);
+    attachInterrupt(wheel_speed_board.wheelSpeedSensorPin, WheelSpeedISR, FALLING);
 
     // Initialize can bus
     can_bus.Initialize(ICAN::BaudRate::kBaud1M);
 
-    // Initialize our timer(s)
-    read_timer.AddTimer(100, ReadWheelSpeedSensor);
-    // read_timer.AddTimer(1000, ReadBrakeTempSensor);
+    // Initialize our timer(s).
+    read_timer.AddTimer(10, ReadWheelSpeedSensor);
+    read_timer.AddTimer(10, ReadBrakeTempSensor);
 }
 
-void loop() { read_timer.Tick(millis()); }
+void loop() 
+{
+    read_timer.Tick(millis()); 
+}
