@@ -3,30 +3,22 @@
  * front and rear break pressure sensors.
  *
  */
-class BrakeBoard
+class BrakePressBoard
 {
-
 public:
-    BrakeBoard();
+    BrakePressBoard();
 
     float ReadBrakePressSensor();
 
-    // Front and rear CAN addresses.
-    // enum CANFrameAddress
-    // {
-    //     FRONT = 0x410,
-    //     REAR = 0x411
-    // };
-    const uint16_t kCANFRONT{0x410};
-    const uint16_t kCANREAR{0x411};
+    const uint16_t CANAddress{0x410};
 
 private:
+
     /// Pins
+
     // Both front and rear break press sensors
     // have the same pin number.
-    static constexpr int BrakePressSensorPin = 36;
-
-    /// Scalars & Offsets
+    static constexpr int brakePressSensorPin = 36;
 
     // Brake Press Sensor
     // Direct scaling for break press sensor.

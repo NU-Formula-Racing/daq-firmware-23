@@ -1,22 +1,20 @@
 #include <Arduino.h>
-#include <daqBrake.h>
+#include <daqBrakePress.h>
 
 /**
- * @brief Construct a new Break Press Board:: Break Press Board Object
- *
- * @param can_frame
+ * @brief Construct a new Brake Board:: Brake Board object.
+ * 
  */
-
-BrakeBoard::BrakeBoard(){};
+BrakePressBoard::BrakePressBoard(){};
 
 /**
  * @brief Reads the brake press sensor ADC value and converts it to pressure units (PSI).
  *
  * @return float
  */
-float BrakeBoard::ReadBrakePressSensor()
+float BrakePressBoard::ReadBrakePressSensor()
 {
     uint16_t raw_ADC_value = 0;
-    raw_ADC_value = analogRead(BrakePressSensorPin);
+    raw_ADC_value = analogRead(brakePressSensorPin);
     return (float)raw_ADC_value * brakePressScalar;
 }
